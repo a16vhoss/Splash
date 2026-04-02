@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { StatusBadge } from '@/components/status-badge';
 import { cn } from '@/lib/utils';
+import { completeAppointment } from './actions';
 
 const FILTER_TABS = [
   { label: 'Todas', estado: undefined },
@@ -94,6 +95,7 @@ export default async function CitasPage({
                   <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Estacion</th>
                   <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Precio</th>
                   <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Estado</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -115,6 +117,18 @@ export default async function CitasPage({
                     </td>
                     <td className="px-6 py-3">
                       <StatusBadge status={apt.estado} />
+                    </td>
+                    <td className="px-6 py-3">
+                      {(apt.estado === 'confirmed' || apt.estado === 'in_progress') && (
+                        <form action={completeAppointment.bind(null, apt.id)}>
+                          <button
+                            type="submit"
+                            className="text-xs font-semibold text-accent hover:underline"
+                          >
+                            Completar
+                          </button>
+                        </form>
+                      )}
                     </td>
                   </tr>
                 ))}
