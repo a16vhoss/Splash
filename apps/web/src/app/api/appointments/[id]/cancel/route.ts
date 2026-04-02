@@ -31,7 +31,7 @@ export async function POST(
   }
 
   const isClient = user.id === appointment.client_id;
-  const carWash = appointment.car_washes as { owner_id: string } | null;
+  const carWash = appointment.car_washes as unknown as { owner_id: string } | null;
   const isAdmin = carWash ? user.id === carWash.owner_id : false;
 
   if (!isClient && !isAdmin) {
