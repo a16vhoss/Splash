@@ -1,0 +1,44 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e25]
+  - generic [ref=e30]:
+    - navigation [ref=e31]:
+      - generic [ref=e32]:
+        - link "Splash" [ref=e33] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e34]:
+          - link "Inicio" [ref=e35] [cursor=pointer]:
+            - /url: /
+          - link "Autolavados" [ref=e36] [cursor=pointer]:
+            - /url: /autolavados
+        - button "M Maria Cliente" [ref=e39] [cursor=pointer]:
+          - generic [ref=e40]: M
+          - generic [ref=e41]: Maria Cliente
+          - img [ref=e42]
+    - main [ref=e44]:
+      - generic [ref=e46]:
+        - heading "Encuentra y agenda tu autolavado en segundos" [level=1] [ref=e47]
+        - paragraph [ref=e48]: Busca autolavados cercanos, compara precios y agenda tu cita sin complicaciones.
+        - generic [ref=e49]:
+          - textbox "Buscar por nombre o zona..." [ref=e50]
+          - button "Buscar" [ref=e51] [cursor=pointer]
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - heading "Autolavados destacados" [level=2] [ref=e54]
+          - link "Ver todos →" [ref=e55] [cursor=pointer]:
+            - /url: /autolavados
+        - link "A AutoSpa Test ★ 0.0 (0 resenas) Av. Reforma 100, CDMX" [ref=e57] [cursor=pointer]:
+          - /url: /autolavados/autospa-test-mnhxvu51
+          - generic [ref=e58]:
+            - generic [ref=e60]: A
+            - generic [ref=e61]:
+              - heading "AutoSpa Test" [level=3] [ref=e62]
+              - generic [ref=e63]:
+                - generic [ref=e64]: ★
+                - generic [ref=e65]: "0.0"
+                - generic [ref=e66]: (0 resenas)
+              - paragraph [ref=e67]: Av. Reforma 100, CDMX
+    - contentinfo [ref=e68]:
+      - generic [ref=e69]:
+        - paragraph [ref=e70]: © 2026 Splash. Todos los derechos reservados.
+        - link "Autolavados" [ref=e72] [cursor=pointer]:
+          - /url: /autolavados

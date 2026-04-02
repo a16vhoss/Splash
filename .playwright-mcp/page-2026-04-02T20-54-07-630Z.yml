@@ -1,0 +1,26 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e6]
+      - heading "Splash" [level=1] [ref=e9]
+      - paragraph [ref=e10]: Crea tu cuenta de cliente
+    - generic [ref=e11]:
+      - button "Iniciar sesion" [ref=e12] [cursor=pointer]
+      - button "Registrar negocio" [ref=e13] [cursor=pointer]
+      - button "Soy cliente" [active] [ref=e14] [cursor=pointer]
+    - generic [ref=e16]:
+      - generic [ref=e26]:
+        - generic [ref=e27]: Tu nombre
+        - textbox "Tu nombre" [ref=e28]:
+          - /placeholder: Carlos Lopez
+      - generic [ref=e17]:
+        - generic [ref=e18]: Email
+        - textbox "Email" [ref=e19]:
+          - /placeholder: tu@email.com
+      - generic [ref=e20]:
+        - generic [ref=e21]: Password
+        - textbox "Password" [ref=e22]:
+          - /placeholder: Minimo 8 caracteres
+      - button "CREAR MI CUENTA" [ref=e29] [cursor=pointer]
+    - paragraph [ref=e24]: © 2026 Splash. Todos los derechos reservados.
+  - alert [ref=e25]

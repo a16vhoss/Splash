@@ -6,6 +6,7 @@ const PUBLIC_PATHS = ['/', '/autolavados', '/login'];
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.includes(pathname)) return true;
   if (pathname.startsWith('/autolavados/')) return true;
+  if (pathname.startsWith('/api/')) return true;
   return false;
 }
 

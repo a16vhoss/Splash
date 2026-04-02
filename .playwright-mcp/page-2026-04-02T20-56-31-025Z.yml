@@ -1,0 +1,57 @@
+- generic [ref=e1]:
+  - alert [ref=e25]
+  - generic [ref=e159]:
+    - navigation [ref=e160]:
+      - generic [ref=e161]:
+        - link "Splash" [ref=e162] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e163]:
+          - link "Inicio" [ref=e164] [cursor=pointer]:
+            - /url: /
+          - link "Autolavados" [ref=e165] [cursor=pointer]:
+            - /url: /autolavados
+        - button "M Maria Cliente" [ref=e168] [cursor=pointer]:
+          - generic [ref=e169]: M
+          - generic [ref=e170]: Maria Cliente
+          - img [ref=e171]
+    - main [ref=e173]:
+      - generic [ref=e174]:
+        - heading "Agendar cita" [level=1] [ref=e175]
+        - generic [ref=e176]:
+          - paragraph [ref=e177]: AutoSpa Test
+          - heading "Lavado Express" [level=2] [ref=e178]
+          - generic [ref=e179]:
+            - generic [ref=e180]: 30 min
+            - generic [ref=e181]: $150
+          - paragraph [ref=e182]: Av. Reforma 100, CDMX
+          - paragraph [ref=e183]: Pago en sitio
+        - heading "Selecciona fecha y hora" [level=3] [ref=e184]
+        - generic [ref=e185]:
+          - generic [ref=e186]:
+            - button "Jue 2" [ref=e187] [cursor=pointer]:
+              - generic [ref=e188]: Jue
+              - generic [ref=e189]: "2"
+            - button "Vie 3" [active] [ref=e190] [cursor=pointer]:
+              - generic [ref=e191]: Vie
+              - generic [ref=e192]: "3"
+            - button "Sab 4" [ref=e193] [cursor=pointer]:
+              - generic [ref=e194]: Sab
+              - generic [ref=e195]: "4"
+            - button "Dom 5" [ref=e196] [cursor=pointer]:
+              - generic [ref=e197]: Dom
+              - generic [ref=e198]: "5"
+            - button "Lun 6" [ref=e199] [cursor=pointer]:
+              - generic [ref=e200]: Lun
+              - generic [ref=e201]: "6"
+            - button "Mar 7" [ref=e202] [cursor=pointer]:
+              - generic [ref=e203]: Mar
+              - generic [ref=e204]: "7"
+            - button "Mie 8" [ref=e205] [cursor=pointer]:
+              - generic [ref=e206]: Mie
+              - generic [ref=e207]: "8"
+          - paragraph [ref=e214]: No hay horarios disponibles
+    - contentinfo [ref=e209]:
+      - generic [ref=e210]:
+        - paragraph [ref=e211]: © 2026 Splash. Todos los derechos reservados.
+        - link "Autolavados" [ref=e213] [cursor=pointer]:
+          - /url: /autolavados

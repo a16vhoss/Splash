@@ -1,0 +1,32 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "Splash" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - link "Inicio" [ref=e7] [cursor=pointer]:
+            - /url: /
+          - link "Autolavados" [ref=e8] [cursor=pointer]:
+            - /url: /autolavados
+        - link "Iniciar sesion" [ref=e10] [cursor=pointer]:
+          - /url: /login
+    - main [ref=e11]:
+      - generic [ref=e13]:
+        - heading "Encuentra y agenda tu autolavado en segundos" [level=1] [ref=e14]
+        - paragraph [ref=e15]: Busca autolavados cercanos, compara precios y agenda tu cita sin complicaciones.
+        - generic [ref=e16]:
+          - textbox "Buscar por nombre o zona..." [ref=e17]
+          - button "Buscar" [ref=e18] [cursor=pointer]
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - heading "Autolavados destacados" [level=2] [ref=e21]
+          - link "Ver todos →" [ref=e22] [cursor=pointer]:
+            - /url: /autolavados
+        - paragraph [ref=e23]: No hay autolavados disponibles aun.
+    - contentinfo [ref=e24]:
+      - generic [ref=e25]:
+        - paragraph [ref=e26]: © 2026 Splash. Todos los derechos reservados.
+        - link "Autolavados" [ref=e28] [cursor=pointer]:
+          - /url: /autolavados
+  - alert [ref=e29]

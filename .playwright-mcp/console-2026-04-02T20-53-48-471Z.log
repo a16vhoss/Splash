@@ -1,0 +1,2 @@
+[  126461ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://splash-lemon.vercel.app/api/availability?car_wash_id=60e9fc22-4518-4397-9d42-3f70e0a487d3&service_id=7b0b0766-57b0-4e6d-9d17-63687f4d5c52&fecha=2026-04-02:0
+[  161544ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://splash-lemon.vercel.app/api/availability?car_wash_id=60e9fc22-4518-4397-9d42-3f70e0a487d3&service_id=7b0b0766-57b0-4e6d-9d17-63687f4d5c52&fecha=2026-04-03:0

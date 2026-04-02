@@ -1,0 +1,1 @@
+[   45897ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://oaxavimhjullwgqyofis.supabase.co/rest/v1/car_washes?select=nombre,verificado,activo,subscription_status:0
