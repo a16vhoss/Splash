@@ -1,5 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
+process.env.TEST_RUN_TS = process.env.TEST_RUN_TS || String(Date.now());
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -9,6 +11,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   use: {
     baseURL: 'http://localhost:3000',
+    headless: false,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

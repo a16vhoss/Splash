@@ -6,7 +6,7 @@ test('profile shows user data', async ({ page }) => {
   await page.waitForTimeout(2000);
 
   await expect(page.getByText('Mi Perfil')).toBeVisible();
-  await expect(page.getByText(TEST_CLIENT.nombre)).toBeVisible();
+  await expect(page.getByRole('main').getByText(TEST_CLIENT.nombre)).toBeVisible();
   await expect(page.getByText(TEST_CLIENT.email)).toBeVisible();
 });
 

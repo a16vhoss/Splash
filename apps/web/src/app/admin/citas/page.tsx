@@ -60,7 +60,7 @@ export default async function CitasPage({
       <div className="flex flex-wrap gap-1 rounded-card bg-muted p-1">
         {FILTER_TABS.map((tab) => {
           const isActive = (tab.estado ?? '') === (estado ?? '');
-          const href = tab.estado ? `/citas?estado=${tab.estado}` : '/citas';
+          const href = tab.estado ? `/admin/citas?estado=${tab.estado}` : '/admin/citas';
           return (
             <Link
               key={tab.label}

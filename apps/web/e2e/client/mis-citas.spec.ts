@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { TEST_ADMIN } from '../fixtures/test-data';
+import { loadSharedData } from '../fixtures/test-data';
 
 test.describe.serial('Client mis-citas', () => {
   test('appointment appears in list', async ({ page }) => {
@@ -13,49 +13,44 @@ test.describe.serial('Client mis-citas', () => {
     await page.goto('/mis-citas');
     await page.waitForTimeout(2000);
 
-    page.on('dialog', async (dialog) => {
-      await dialog.accept('Ya no puedo asistir');
+    // Override window.prompt to auto-return a value (avoids dialog timing issues)
+    await page.evaluate(() => {
+      window.prompt = () => 'Ya no puedo asistir';
     });
 
     await page.getByRole('button', { name: 'Cancelar cita' }).first().click();
+
+    // Wait for the cancel API call and re-fetch
+    await page.waitForTimeout(3000);
+    await page.reload();
     await page.waitForTimeout(2000);
     await expect(page.getByText('Cancelada')).toBeVisible();
   });
 
   test('create second appointment for rating flow', async ({ page }) => {
-    await page.goto('/autolavados');
-    await page.getByPlaceholder('Buscar...').fill(TEST_ADMIN.nombreNegocio);
-    await page.getByRole('button', { name: 'Buscar' }).click();
-    await page.waitForTimeout(1500);
+    const { carWashSlug } = loadSharedData();
+    await page.goto(`/autolavados/${carWashSlug}`);
 
-    const washCard = page.getByText(TEST_ADMIN.nombreNegocio);
-    if (!(await washCard.isVisible({ timeout: 3000 }).catch(() => false))) {
-      test.skip(true, 'Car wash not verified — cannot find in listing');
-      return;
-    }
-
-    await washCard.click();
-    await page.getByRole('link', { name: /Agendar/i }).first().click();
+    await page.getByRole('link', { name: 'Agendar' }).first().click();
     await expect(page.getByText('Agendar cita')).toBeVisible();
     await page.waitForTimeout(2000);
 
-    const dateButtons = page.locator('button').filter({ hasText: /^\d+$/ });
-    let foundSlot = false;
-
-    for (let i = 0; i < await dateButtons.count() && !foundSlot; i++) {
-      await dateButtons.nth(i).click();
+    // Select tomorrow (2nd date button)
+    const dateButtons = page.locator('button').filter({ hasText: /Lun|Mar|Mie|Jue|Vie|Sab|Dom/ });
+    if (await dateButtons.count() > 1) {
+      await dateButtons.nth(1).click();
       await page.waitForTimeout(1500);
-
-      const availableSlots = page.locator('.grid button:not([disabled])');
-      if (await availableSlots.count() > 0) {
-        await availableSlots.first().click();
-        foundSlot = true;
-      }
     }
 
-    expect(foundSlot).toBe(true);
+    // Click on the first available time slot
+    const timeSlots = page.getByRole('button', { name: /^\d{2}:\d{2}$/ });
+    await expect(timeSlots.first()).toBeVisible({ timeout: 5000 });
+    await timeSlots.first().click();
 
+    // Confirm
+    await expect(page.getByRole('button', { name: /Confirmar/ })).toBeVisible();
     await page.getByRole('button', { name: /Confirmar/ }).click();
+
     await page.waitForURL(/\/mis-citas/, { timeout: 10_000 });
     await expect(page.getByText('Cita agendada exitosamente')).toBeVisible();
   });

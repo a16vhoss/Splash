@@ -1,5 +1,5 @@
-import { test } from '@playwright/test';
-import { TEST_ADMIN, TEST_CLIENT, ADMIN_STATE, CLIENT_STATE } from './fixtures/test-data';
+import { test, expect } from '@playwright/test';
+import { TEST_ADMIN, TEST_CLIENT, ADMIN_STATE, CLIENT_STATE, saveSharedData } from './fixtures/test-data';
 
 test('register wash_admin and save auth state', async ({ page }) => {
   await page.goto('/login');
@@ -19,6 +19,20 @@ test('register wash_admin and save auth state', async ({ page }) => {
 
   // Wait for redirect to admin dashboard
   await page.waitForURL('/admin/dashboard', { timeout: 15_000 });
+
+  // Fetch car wash slug and ID via API
+  const carWashData = await page.evaluate(async () => {
+    const res = await fetch('/api/my-car-wash');
+    if (!res.ok) return null;
+    return res.json();
+  });
+
+  expect(carWashData).toBeTruthy();
+  saveSharedData({
+    carWashId: carWashData.id,
+    carWashSlug: carWashData.slug,
+    carWashNombre: carWashData.nombre,
+  });
 
   // Save auth state
   await page.context().storageState({ path: ADMIN_STATE });

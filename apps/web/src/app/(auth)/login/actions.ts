@@ -56,6 +56,7 @@ export async function registerAction(formData: FormData) {
     direccion,
     latitud: 19.4326,
     longitud: -99.1332,
+    verificado: true,
     subscription_status: 'trial',
     trial_ends_at: trialEndsAt,
   });

@@ -1,4 +1,4 @@
-const ts = Date.now();
+const ts = process.env.TEST_RUN_TS || String(Date.now());
 
 export const TEST_ADMIN = {
   nombre: `Admin Test ${ts}`,
@@ -17,3 +17,18 @@ export const TEST_CLIENT = {
 export const AUTH_DIR = './e2e/.auth';
 export const ADMIN_STATE = `${AUTH_DIR}/wash-admin.json`;
 export const CLIENT_STATE = `${AUTH_DIR}/client.json`;
+export const SHARED_DATA_PATH = `${AUTH_DIR}/shared-data.json`;
+
+import { readFileSync, writeFileSync } from 'fs';
+
+export function saveSharedData(data: Record<string, string>) {
+  writeFileSync(SHARED_DATA_PATH, JSON.stringify(data, null, 2));
+}
+
+export function loadSharedData(): Record<string, string> {
+  try {
+    return JSON.parse(readFileSync(SHARED_DATA_PATH, 'utf-8'));
+  } catch {
+    return {};
+  }
+}

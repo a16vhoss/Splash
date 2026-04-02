@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('admin marks appointment as completed', async ({ page }) => {
   await page.goto('/admin/citas');
-  await expect(page.getByText('Citas')).toBeVisible();
+  await expect(page.locator('h2', { hasText: 'Citas' })).toBeVisible();
 
   // Filter to confirmed appointments
   await page.getByRole('link', { name: 'Confirmadas' }).click();
