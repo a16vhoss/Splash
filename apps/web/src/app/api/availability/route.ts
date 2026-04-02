@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     .from('business_hours')
     .select('hora_apertura, hora_cierre, cerrado')
     .eq('car_wash_id', car_wash_id)
-    .eq('day_of_week', dayOfWeek)
+    .eq('dia_semana', dayOfWeek)
     .single();
 
   if (hoursError || !businessHours) {
