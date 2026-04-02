@@ -1,0 +1,155 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabase } from '@/lib/supabase/server';
+import { createAppointmentSchema, NotifType, SubStatus } from '@splash/shared';
+
+function timeToMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function minutesToTime(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+export async function POST(request: NextRequest) {
+  const supabase = await createServerSupabase();
+
+  // 1. Auth
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+  }
+
+  // 2. Validate body
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'JSON inválido' }, { status: 400 });
+  }
+
+  const parsed = createAppointmentSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
+  }
+
+  const { car_wash_id, service_id, fecha, hora_inicio, notas_cliente } = parsed.data;
+
+  // 3. Get service
+  const { data: service, error: serviceError } = await supabase
+    .from('services')
+    .select('duracion_min, precio, activo')
+    .eq('id', service_id)
+    .single();
+
+  if (serviceError || !service) {
+    return NextResponse.json({ error: 'Servicio no encontrado' }, { status: 404 });
+  }
+
+  if (!service.activo) {
+    return NextResponse.json({ error: 'Servicio no disponible' }, { status: 422 });
+  }
+
+  // 4. Calculate hora_fin
+  const startMinutes = timeToMinutes(hora_inicio);
+  const hora_fin = minutesToTime(startMinutes + service.duracion_min);
+
+  // 5. Get car wash
+  const { data: carWash, error: carWashError } = await supabase
+    .from('car_washes')
+    .select('num_estaciones, activo, verificado, subscription_status, owner_id')
+    .eq('id', car_wash_id)
+    .single();
+
+  if (carWashError || !carWash) {
+    return NextResponse.json({ error: 'Car wash no encontrado' }, { status: 404 });
+  }
+
+  // 6. Validate car wash availability
+  if (!carWash.activo || !carWash.verificado) {
+    return NextResponse.json({ error: 'Car wash no disponible' }, { status: 422 });
+  }
+
+  const validSubscriptionStatuses: string[] = [SubStatus.ACTIVE, SubStatus.TRIAL];
+  if (!validSubscriptionStatuses.includes(carWash.subscription_status)) {
+    return NextResponse.json({ error: 'Car wash no disponible' }, { status: 422 });
+  }
+
+  // 7. Find available station
+  const { data: busyAppointments, error: busyError } = await supabase
+    .from('appointments')
+    .select('estacion')
+    .eq('car_wash_id', car_wash_id)
+    .eq('fecha', fecha)
+    .not('estado', 'in', '("cancelled","no_show")')
+    .lt('hora_inicio', hora_fin)
+    .gt('hora_fin', hora_inicio);
+
+  if (busyError) {
+    return NextResponse.json({ error: 'Error al verificar disponibilidad' }, { status: 500 });
+  }
+
+  const busyStations = new Set((busyAppointments ?? []).map((a) => a.estacion));
+
+  let estacion: number | null = null;
+  for (let i = 1; i <= carWash.num_estaciones; i++) {
+    if (!busyStations.has(i)) {
+      estacion = i;
+      break;
+    }
+  }
+
+  // 8. No station available
+  if (estacion === null) {
+    return NextResponse.json({ error: 'Horario ya no disponible' }, { status: 409 });
+  }
+
+  // 9. Insert appointment
+  const { data: appointment, error: insertError } = await supabase
+    .from('appointments')
+    .insert({
+      car_wash_id,
+      service_id,
+      client_id: user.id,
+      fecha,
+      hora_inicio,
+      hora_fin,
+      estacion,
+      precio_total: service.precio,
+      estado: 'confirmed',
+      notas_cliente: notas_cliente ?? null,
+    })
+    .select()
+    .single();
+
+  if (insertError || !appointment) {
+    return NextResponse.json({ error: 'Error al crear cita' }, { status: 500 });
+  }
+
+  // 10. Create notifications for client and car wash owner
+  const notifications = [
+    {
+      user_id: user.id,
+      appointment_id: appointment.id,
+      tipo: NotifType.CONFIRMATION,
+      titulo: 'Cita confirmada',
+      mensaje: `Tu cita para el ${fecha} a las ${hora_inicio} ha sido confirmada.`,
+      leida: false,
+    },
+    {
+      user_id: carWash.owner_id,
+      appointment_id: appointment.id,
+      tipo: NotifType.CONFIRMATION,
+      titulo: 'Nueva cita',
+      mensaje: `Nueva cita el ${fecha} a las ${hora_inicio} en estación ${estacion}.`,
+      leida: false,
+    },
+  ];
+
+  await supabase.from('notifications').insert(notifications);
+
+  // 11. Return 201
+  return NextResponse.json({ appointment }, { status: 201 });
+}
