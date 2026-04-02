@@ -1,0 +1,35 @@
+- generic [ref=e1]:
+  - alert [ref=e29]
+  - generic [ref=e31]:
+    - generic [ref=e32]:
+      - img [ref=e34]
+      - heading "Splash" [level=1] [ref=e37]
+      - paragraph [ref=e38]: Registra tu autolavado
+    - generic [ref=e39]:
+      - button "Iniciar sesion" [ref=e40] [cursor=pointer]
+      - button "Registrar negocio" [active] [ref=e41] [cursor=pointer]
+      - button "Soy cliente" [ref=e42] [cursor=pointer]
+    - generic [ref=e44]:
+      - generic [ref=e53]:
+        - generic [ref=e54]: Tu nombre
+        - textbox "Tu nombre" [ref=e55]:
+          - /placeholder: Carlos Lopez
+      - generic [ref=e56]:
+        - generic [ref=e57]: Nombre del autolavado
+        - textbox "Nombre del autolavado" [ref=e58]:
+          - /placeholder: AutoSpa Premium
+      - generic [ref=e59]:
+        - generic [ref=e60]: Direccion del negocio
+        - textbox "Direccion del negocio" [ref=e61]:
+          - /placeholder: Av. Reforma 222, CDMX
+      - generic [ref=e45]:
+        - generic [ref=e46]: Email
+        - textbox "Email" [ref=e47]:
+          - /placeholder: tu@email.com
+      - generic [ref=e48]:
+        - generic [ref=e49]: Password
+        - textbox "Password" [ref=e50]:
+          - /placeholder: Minimo 8 caracteres
+      - button "REGISTRAR MI NEGOCIO" [ref=e62] [cursor=pointer]
+      - paragraph [ref=e63]: Trial gratuito de 14 dias. Sin tarjeta de credito.
+    - paragraph [ref=e52]: © 2026 Splash. Todos los derechos reservados.

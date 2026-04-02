@@ -1,0 +1,22 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e29]
+  - generic [ref=e31]:
+    - generic [ref=e32]:
+      - img [ref=e34]
+      - heading "Splash" [level=1] [ref=e37]
+      - paragraph [ref=e38]: Panel de administracion
+    - generic [ref=e39]:
+      - button "Iniciar sesion" [ref=e40] [cursor=pointer]
+      - button "Registrar negocio" [ref=e41] [cursor=pointer]
+      - button "Soy cliente" [ref=e42] [cursor=pointer]
+    - generic [ref=e44]:
+      - generic [ref=e45]:
+        - generic [ref=e46]: Email
+        - textbox "Email" [ref=e47]:
+          - /placeholder: tu@email.com
+      - generic [ref=e48]:
+        - generic [ref=e49]: Password
+        - textbox "Password" [ref=e50]:
+          - /placeholder: ••••••••
+      - button "INGRESAR" [ref=e51] [cursor=pointer]
+    - paragraph [ref=e52]: © 2026 Splash. Todos los derechos reservados.
