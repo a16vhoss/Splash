@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { loginAction, registerAction } from './actions';
+import { loginAction, registerAction, registerClientAction } from './actions';
+
+type Mode = 'login' | 'register' | 'client';
 
 export default function LoginPage() {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<Mode>('login');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -14,13 +16,22 @@ export default function LoginPage() {
     setLoading(true);
 
     const formData = new FormData(event.currentTarget);
-    const action = mode === 'login' ? loginAction : registerAction;
+    let action: typeof loginAction;
+    if (mode === 'login') action = loginAction;
+    else if (mode === 'register') action = registerAction;
+    else action = registerClientAction;
+
     const result = await action(formData);
 
     if (result?.error) {
       setError(result.error);
       setLoading(false);
     }
+  }
+
+  function changeMode(next: Mode) {
+    setMode(next);
+    setError(null);
   }
 
   return (
@@ -36,7 +47,9 @@ export default function LoginPage() {
           </div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Splash</h1>
           <p className="text-sm text-slate-500 mt-1">
-            {mode === 'login' ? 'Panel de administracion' : 'Registra tu autolavado'}
+            {mode === 'login' && 'Panel de administracion'}
+            {mode === 'register' && 'Registra tu autolavado'}
+            {mode === 'client' && 'Crea tu cuenta de cliente'}
           </p>
         </div>
 
@@ -44,7 +57,7 @@ export default function LoginPage() {
         <div className="flex mb-6 bg-muted rounded-card p-1">
           <button
             type="button"
-            onClick={() => { setMode('login'); setError(null); }}
+            onClick={() => changeMode('login')}
             className={`flex-1 py-2 text-sm font-semibold rounded-[6px] transition-colors duration-200 ${
               mode === 'login' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'
             }`}
@@ -53,18 +66,28 @@ export default function LoginPage() {
           </button>
           <button
             type="button"
-            onClick={() => { setMode('register'); setError(null); }}
+            onClick={() => changeMode('register')}
             className={`flex-1 py-2 text-sm font-semibold rounded-[6px] transition-colors duration-200 ${
               mode === 'register' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'
             }`}
           >
             Registrar negocio
           </button>
+          <button
+            type="button"
+            onClick={() => changeMode('client')}
+            className={`flex-1 py-2 text-sm font-semibold rounded-[6px] transition-colors duration-200 ${
+              mode === 'client' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'
+            }`}
+          >
+            Soy cliente
+          </button>
         </div>
 
         {/* Form Card */}
         <div className="bg-white border border-border rounded-card shadow-sm p-8">
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
+            {/* Business registration fields */}
             {mode === 'register' && (
               <>
                 <div className="space-y-1.5">
@@ -85,6 +108,15 @@ export default function LoginPage() {
               </>
             )}
 
+            {/* Client registration: nombre only */}
+            {mode === 'client' && (
+              <div className="space-y-1.5">
+                <label htmlFor="nombre" className="block text-sm font-medium text-slate-700">Tu nombre</label>
+                <input id="nombre" name="nombre" type="text" required placeholder="Carlos Lopez"
+                  className="w-full px-3 py-2 text-sm text-slate-900 placeholder-slate-400 bg-white rounded-input border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors" />
+              </div>
+            )}
+
             <div className="space-y-1.5">
               <label htmlFor="email" className="block text-sm font-medium text-slate-700">Email</label>
               <input id="email" name="email" type="email" autoComplete="email" required placeholder="tu@email.com"
@@ -94,7 +126,7 @@ export default function LoginPage() {
             <div className="space-y-1.5">
               <label htmlFor="password" className="block text-sm font-medium text-slate-700">Password</label>
               <input id="password" name="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required
-                placeholder={mode === 'register' ? 'Minimo 8 caracteres' : '••••••••'}
+                placeholder={mode !== 'login' ? 'Minimo 8 caracteres' : '••••••••'}
                 className="w-full px-3 py-2 text-sm text-slate-900 placeholder-slate-400 bg-white rounded-input border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors" />
             </div>
 
@@ -108,7 +140,7 @@ export default function LoginPage() {
               className="w-full py-2.5 px-4 rounded-card bg-primary text-white font-semibold uppercase tracking-wider text-sm transition-opacity disabled:opacity-60 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
               {loading
                 ? (mode === 'login' ? 'Ingresando...' : 'Creando cuenta...')
-                : (mode === 'login' ? 'INGRESAR' : 'REGISTRAR MI NEGOCIO')
+                : (mode === 'login' ? 'INGRESAR' : mode === 'register' ? 'REGISTRAR MI NEGOCIO' : 'CREAR MI CUENTA')
               }
             </button>
 

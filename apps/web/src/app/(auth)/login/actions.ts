@@ -63,3 +63,31 @@ export async function registerAction(formData: FormData) {
 
   redirect('/admin/dashboard');
 }
+
+export async function registerClientAction(formData: FormData) {
+  const supabase = await createServerSupabase();
+
+  const nombre = formData.get('nombre') as string;
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+
+  if (!nombre || nombre.length < 2) return { error: 'Nombre muy corto' };
+  if (!email) return { error: 'Email requerido' };
+  if (!password || password.length < 8) return { error: 'Password: minimo 8 caracteres' };
+
+  // Create auth user
+  const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
+  if (authError) return { error: authError.message };
+  if (!authData.user) return { error: 'Error al crear cuenta' };
+
+  // Create user profile with client role
+  const { error: userError } = await supabase.from('users').insert({
+    id: authData.user.id,
+    email,
+    nombre,
+    role: 'client',
+  });
+  if (userError) return { error: userError.message };
+
+  redirect('/');
+}

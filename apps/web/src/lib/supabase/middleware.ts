@@ -1,6 +1,14 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextRequest, NextResponse } from 'next/server';
 
+const PUBLIC_PATHS = ['/', '/autolavados', '/login'];
+
+function isPublicPath(pathname: string): boolean {
+  if (PUBLIC_PATHS.includes(pathname)) return true;
+  if (pathname.startsWith('/autolavados/')) return true;
+  return false;
+}
+
 export async function updateSession(request: NextRequest): Promise<NextResponse> {
   let response = NextResponse.next({ request });
 
@@ -24,23 +32,21 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-
   const pathname = request.nextUrl.pathname;
-  const isLoginPage = pathname === '/login';
-  const isAdminPath = pathname.startsWith('/admin');
-  const isSuperPath = pathname.startsWith('/super');
 
-  // No user → redirect to /login (unless already there)
-  if (!user) {
-    if (!isLoginPage) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = '/login';
-      return NextResponse.redirect(loginUrl);
-    }
+  // Public paths: allow without auth
+  if (!user && isPublicPath(pathname)) {
     return response;
   }
 
-  // Fetch role from users table
+  // No user on protected path: redirect to login
+  if (!user) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = '/login';
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Fetch role
   const { data: userRecord } = await supabase
     .from('users')
     .select('role')
@@ -49,54 +55,46 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
   const role = userRecord?.role as string | undefined;
 
-  // User on /login → redirect based on role
-  if (isLoginPage) {
-    const dashboardUrl = request.nextUrl.clone();
-    dashboardUrl.pathname = role === 'super_admin' ? '/super/metricas' : '/admin/dashboard';
-    return NextResponse.redirect(dashboardUrl);
+  // Logged-in user on /login: redirect based on role
+  if (pathname === '/login') {
+    const url = request.nextUrl.clone();
+    if (role === 'super_admin') url.pathname = '/super/metricas';
+    else if (role === 'wash_admin') url.pathname = '/admin/dashboard';
+    else url.pathname = '/';
+    return NextResponse.redirect(url);
   }
 
-  // Client role trying to access /admin or /super → redirect to /login
-  if (role === 'client' && (isAdminPath || isSuperPath)) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/login';
-    return NextResponse.redirect(loginUrl);
+  // Client on admin/super paths: block
+  if (role === 'client' && (pathname.startsWith('/admin') || pathname.startsWith('/super'))) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
   }
 
-  // wash_admin trying to access /super → redirect to /admin/dashboard
-  if (role === 'wash_admin' && isSuperPath) {
-    const dashboardUrl = request.nextUrl.clone();
-    dashboardUrl.pathname = '/admin/dashboard';
-    return NextResponse.redirect(dashboardUrl);
+  // wash_admin on super paths: block
+  if (role === 'wash_admin' && pathname.startsWith('/super')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/admin/dashboard';
+    return NextResponse.redirect(url);
   }
 
-  // wash_admin subscription checks on /admin routes
-  if (role === 'wash_admin' && isAdminPath) {
-    const isSubscriptionPage = pathname.startsWith('/admin/suscripcion');
+  // wash_admin subscription check on admin paths
+  if (role === 'wash_admin' && pathname.startsWith('/admin') && !pathname.startsWith('/admin/suscripcion')) {
+    const { data: carWash } = await supabase
+      .from('car_washes')
+      .select('subscription_status, trial_ends_at')
+      .eq('owner_id', user.id)
+      .single();
 
-    if (!isSubscriptionPage) {
-      // Fetch subscription status and trial expiration from car_washes
-      const { data: carWash } = await supabase
-        .from('car_washes')
-        .select('subscription_status, trial_ends_at')
-        .eq('owner_id', user.id)
-        .single();
+    if (carWash) {
+      const { subscription_status, trial_ends_at } = carWash;
+      const expired = subscription_status === 'past_due' || subscription_status === 'cancelled' ||
+        (subscription_status === 'trial' && trial_ends_at && new Date(trial_ends_at) < new Date());
 
-      if (carWash) {
-        const { subscription_status, trial_ends_at } = carWash;
-        const isPastDueOrCancelled =
-          subscription_status === 'past_due' || subscription_status === 'cancelled';
-
-        const trialExpired =
-          subscription_status === 'trialing' &&
-          trial_ends_at &&
-          new Date(trial_ends_at) < new Date();
-
-        if (isPastDueOrCancelled || trialExpired) {
-          const suscripcionUrl = request.nextUrl.clone();
-          suscripcionUrl.pathname = '/admin/suscripcion';
-          return NextResponse.redirect(suscripcionUrl);
-        }
+      if (expired) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin/suscripcion';
+        return NextResponse.redirect(url);
       }
     }
   }
