@@ -1,0 +1,1 @@
+[   40466ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://splash-lemon.vercel.app/api/availability?car_wash_id=test&service_id=test&fecha=2026-04-02:0

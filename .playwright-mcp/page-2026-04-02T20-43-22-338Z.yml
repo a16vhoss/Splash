@@ -1,0 +1,61 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: Splash
+        - generic [ref=e6]: Panel admin
+      - navigation [ref=e7]:
+        - link "Dashboard" [ref=e8] [cursor=pointer]:
+          - /url: /admin/dashboard
+          - img [ref=e9]
+          - text: Dashboard
+        - link "Citas" [ref=e14] [cursor=pointer]:
+          - /url: /admin/citas
+          - img [ref=e15]
+          - text: Citas
+        - link "Servicios" [ref=e17] [cursor=pointer]:
+          - /url: /admin/servicios
+          - img [ref=e18]
+          - text: Servicios
+        - link "Reportes" [ref=e20] [cursor=pointer]:
+          - /url: /admin/reportes
+          - img [ref=e21]
+          - text: Reportes
+      - generic [ref=e22]:
+        - generic [ref=e23]: MA
+        - generic [ref=e24]:
+          - generic [ref=e25]: Mi Autolavado
+          - generic [ref=e26]: Plan Pro
+    - generic [ref=e27]:
+      - banner [ref=e28]:
+        - heading "Dashboard" [level=1] [ref=e29]
+        - button "Notificaciones" [ref=e30] [cursor=pointer]:
+          - img [ref=e31]
+      - main [ref=e34]:
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - heading "Dashboard" [level=2] [ref=e37]
+            - paragraph [ref=e38]: AutoSpa Test
+          - generic [ref=e39]:
+            - generic [ref=e40]:
+              - paragraph [ref=e41]: Citas hoy
+              - generic [ref=e42]:
+                - paragraph [ref=e43]: "0"
+                - generic [ref=e44]: "+0"
+              - paragraph [ref=e45]: vs ayer
+            - generic [ref=e46]:
+              - paragraph [ref=e47]: Ingresos hoy
+              - paragraph [ref=e49]: $0.00
+              - paragraph [ref=e50]: Solo completadas
+            - generic [ref=e51]:
+              - paragraph [ref=e52]: Calificacion
+              - paragraph [ref=e54]: —
+              - paragraph [ref=e55]: 0 resenas
+            - generic [ref=e56]:
+              - paragraph [ref=e57]: Estatus
+              - paragraph [ref=e59]: Activo
+              - paragraph [ref=e60]: trial
+          - generic [ref=e61]:
+            - heading "Proximas citas" [level=3] [ref=e63]
+            - generic [ref=e64]: No hay citas proximas
+  - alert [ref=e65]

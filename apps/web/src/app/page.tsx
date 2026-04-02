@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { createServerSupabase } from '@/lib/supabase/server';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
