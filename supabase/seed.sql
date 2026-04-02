@@ -1,0 +1,126 @@
+-- ============================================================
+-- Splash — Seed Data
+-- ============================================================
+-- NOTE: All INSERT statements below are commented out because
+-- they require real UUIDs from Supabase Auth (auth.users).
+--
+-- Steps to use this seed:
+--   1. Create the users in Supabase Auth (Dashboard or via API).
+--   2. Copy the generated UUIDs and replace the placeholder
+--      values below (e.g. '<admin-uuid>', '<client-uuid>').
+--   3. Run this file against your Supabase project:
+--        psql <connection-string> -f supabase/seed.sql
+-- ============================================================
+
+
+-- ------------------------------------------------------------
+-- 1. Users
+-- ------------------------------------------------------------
+-- Wash admin (must already exist in auth.users)
+-- INSERT INTO users (id, email, nombre, telefono, role, auth_provider, activo)
+-- VALUES (
+--   '<admin-uuid>',
+--   'admin@splashwash.com',
+--   'Carlos Ramirez',
+--   '+52 55 1234 5678',
+--   'wash_admin',
+--   'google',
+--   TRUE
+-- );
+
+-- Regular client
+-- INSERT INTO users (id, email, nombre, telefono, role, auth_provider, activo)
+-- VALUES (
+--   '<client-uuid>',
+--   'cliente@example.com',
+--   'Ana Torres',
+--   '+52 55 8765 4321',
+--   'client',
+--   'google',
+--   TRUE
+-- );
+
+-- Super admin
+-- INSERT INTO users (id, email, nombre, role, auth_provider, activo)
+-- VALUES (
+--   '<superadmin-uuid>',
+--   'superadmin@splashwash.com',
+--   'Diego Splash',
+--   'super_admin',
+--   'email',
+--   TRUE
+-- );
+
+
+-- ------------------------------------------------------------
+-- 2. Car wash
+-- ------------------------------------------------------------
+-- INSERT INTO car_washes (
+--   id, owner_id, nombre, slug, descripcion, direccion,
+--   latitud, longitud, telefono, num_estaciones,
+--   activo, verificado, subscription_status, trial_ends_at
+-- )
+-- VALUES (
+--   'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+--   '<admin-uuid>',
+--   'Splash Express CDMX',
+--   'splash-express-cdmx',
+--   'El mejor lavado express de la ciudad.',
+--   'Av. Insurgentes Sur 1234, Col. Del Valle, CDMX',
+--   19.3839900,
+--   -99.1663900,
+--   '+52 55 2222 3333',
+--   3,
+--   TRUE,
+--   TRUE,
+--   'trial',
+--   NOW() + INTERVAL '14 days'
+-- );
+
+
+-- ------------------------------------------------------------
+-- 3. Services
+-- ------------------------------------------------------------
+-- INSERT INTO services (car_wash_id, nombre, descripcion, precio, duracion_min, orden, activo)
+-- VALUES
+--   (
+--     'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+--     'Lavado Básico',
+--     'Exterior con espuma y enjuague.',
+--     120.00,
+--     20,
+--     1,
+--     TRUE
+--   ),
+--   (
+--     'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+--     'Lavado Completo',
+--     'Exterior + aspirado interior.',
+--     220.00,
+--     40,
+--     2,
+--     TRUE
+--   ),
+--   (
+--     'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+--     'Lavado Premium',
+--     'Exterior, interior, encerado y aromatizante.',
+--     380.00,
+--     60,
+--     3,
+--     TRUE
+--   );
+
+
+-- ------------------------------------------------------------
+-- 4. Business hours (0 = Sunday … 6 = Saturday)
+-- ------------------------------------------------------------
+-- INSERT INTO business_hours (car_wash_id, dia_semana, hora_apertura, hora_cierre, cerrado)
+-- VALUES
+--   ('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 0, '09:00', '15:00', FALSE), -- Sunday
+--   ('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 1, '08:00', '20:00', FALSE), -- Monday
+--   ('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 2, '08:00', '20:00', FALSE), -- Tuesday
+--   ('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 3, '08:00', '20:00', FALSE), -- Wednesday
+--   ('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 4, '08:00', '20:00', FALSE), -- Thursday
+--   ('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 5, '08:00', '20:00', FALSE), -- Friday
+--   ('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 6, '09:00', '18:00', FALSE); -- Saturday
