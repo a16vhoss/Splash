@@ -1,5 +1,7 @@
+export const dynamic = 'force-dynamic';
+
 import { createClient } from '@supabase/supabase-js';
-import { StatusBadge } from '@/components/status-badge';
+
 
 function getSupabaseAdmin() {
   return createClient(

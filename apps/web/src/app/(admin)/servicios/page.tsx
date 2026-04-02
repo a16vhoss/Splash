@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createService, deleteService, toggleService } from './actions';
 

@@ -91,15 +91,12 @@ export async function GET(request: NextRequest) {
   const slots = [];
   for (let start = openMinutes; start + duracion_min <= closeMinutes; start += SLOT_DURATION_MIN) {
     const slotStart = minutesToTime(start);
-    const slotEnd = minutesToTime(start + duracion_min);
-
     // Count overlapping appointments
     const overlapping = existingAppointments.filter((appt) => {
       const aStart = timeToMinutes(appt.hora_inicio);
       const aEnd = timeToMinutes(appt.hora_fin);
-      const sStart = start;
       const sEnd = start + duracion_min;
-      return aStart < sEnd && aEnd > sStart;
+      return aStart < sEnd && aEnd > start;
     }).length;
 
     const estaciones_libres = num_estaciones - overlapping;
