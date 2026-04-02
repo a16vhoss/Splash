@@ -36,10 +36,7 @@ export default function MisCitasPage() {
 
     const res = await fetch(`/api/appointments/${id}/cancel`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ motivo_cancelacion: motivo }),
     });
 

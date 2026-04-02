@@ -44,10 +44,7 @@ export default function AgendarPage() {
 
     const res = await fetch('/api/appointments', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         car_wash_id: carWashId,
         service_id: serviceId,
