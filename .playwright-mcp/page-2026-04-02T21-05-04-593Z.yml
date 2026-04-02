@@ -1,0 +1,77 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "Splash" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - link "Inicio" [ref=e7] [cursor=pointer]:
+            - /url: /
+          - link "Autolavados" [ref=e8] [cursor=pointer]:
+            - /url: /autolavados
+        - button "M Maria Cliente" [ref=e21] [cursor=pointer]:
+          - generic [ref=e22]: M
+          - generic [ref=e23]: Maria Cliente
+          - img [ref=e24]
+    - main [ref=e11]:
+      - generic [ref=e12]:
+        - heading "Agendar cita" [level=1] [ref=e26]
+        - generic [ref=e27]:
+          - paragraph [ref=e28]: AutoSpa Test
+          - heading "Lavado Express" [level=2] [ref=e29]
+          - generic [ref=e30]:
+            - generic [ref=e31]: 30 min
+            - generic [ref=e32]: $150
+          - paragraph [ref=e33]: Av. Reforma 100, CDMX
+          - paragraph [ref=e34]: Pago en sitio
+        - heading "Selecciona fecha y hora" [level=3] [ref=e35]
+        - generic [ref=e36]:
+          - generic [ref=e37]:
+            - button "Jue 2" [ref=e38] [cursor=pointer]:
+              - generic [ref=e39]: Jue
+              - generic [ref=e40]: "2"
+            - button "Vie 3" [active] [ref=e41] [cursor=pointer]:
+              - generic [ref=e42]: Vie
+              - generic [ref=e43]: "3"
+            - button "Sab 4" [ref=e44] [cursor=pointer]:
+              - generic [ref=e45]: Sab
+              - generic [ref=e46]: "4"
+            - button "Dom 5" [ref=e47] [cursor=pointer]:
+              - generic [ref=e48]: Dom
+              - generic [ref=e49]: "5"
+            - button "Lun 6" [ref=e50] [cursor=pointer]:
+              - generic [ref=e51]: Lun
+              - generic [ref=e52]: "6"
+            - button "Mar 7" [ref=e53] [cursor=pointer]:
+              - generic [ref=e54]: Mar
+              - generic [ref=e55]: "7"
+            - button "Mie 8" [ref=e56] [cursor=pointer]:
+              - generic [ref=e57]: Mie
+              - generic [ref=e58]: "8"
+          - generic [ref=e59]:
+            - button "08:00" [ref=e80] [cursor=pointer]
+            - button "08:30" [ref=e81] [cursor=pointer]
+            - button "09:00" [ref=e82] [cursor=pointer]
+            - button "09:30" [ref=e83] [cursor=pointer]
+            - button "10:00" [ref=e84] [cursor=pointer]
+            - button "10:30" [ref=e85] [cursor=pointer]
+            - button "11:00" [ref=e86] [cursor=pointer]
+            - button "11:30" [ref=e87] [cursor=pointer]
+            - button "12:00" [ref=e88] [cursor=pointer]
+            - button "12:30" [ref=e89] [cursor=pointer]
+            - button "13:00" [ref=e90] [cursor=pointer]
+            - button "13:30" [ref=e91] [cursor=pointer]
+            - button "14:00" [ref=e92] [cursor=pointer]
+            - button "14:30" [ref=e93] [cursor=pointer]
+            - button "15:00" [ref=e94] [cursor=pointer]
+            - button "15:30" [ref=e95] [cursor=pointer]
+            - button "16:00" [ref=e96] [cursor=pointer]
+            - button "16:30" [ref=e97] [cursor=pointer]
+            - button "17:00" [ref=e98] [cursor=pointer]
+            - button "17:30" [ref=e99] [cursor=pointer]
+    - contentinfo [ref=e14]:
+      - generic [ref=e15]:
+        - paragraph [ref=e16]: © 2026 Splash. Todos los derechos reservados.
+        - link "Autolavados" [ref=e18] [cursor=pointer]:
+          - /url: /autolavados
+  - alert [ref=e19]

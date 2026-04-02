@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       hora_inicio,
       hora_fin,
       estacion,
-      precio_total: service.precio,
+      precio_cobrado: service.precio,
       estado: 'confirmed',
       notas_cliente: notas_cliente ?? null,
     })
@@ -125,7 +125,8 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (insertError || !appointment) {
-    return NextResponse.json({ error: 'Error al crear cita' }, { status: 500 });
+    console.error('Insert appointment error:', insertError);
+    return NextResponse.json({ error: insertError?.message ?? 'Error al crear cita' }, { status: 500 });
   }
 
   // 10. Create notifications for client and car wash owner
