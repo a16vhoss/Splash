@@ -3,8 +3,7 @@ export const dynamic = 'force-dynamic';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createService, deleteService, toggleService } from './actions';
 
-const DAYS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
-const DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
 
 export default async function ServiciosPage() {
   const supabase = await createServerSupabase();
@@ -31,12 +30,12 @@ export default async function ServiciosPage() {
 
     const { data: bh } = await supabase
       .from('business_hours')
-      .select('day_of_week, apertura, cierre, activo')
+      .select('dia_semana, hora_apertura, hora_cierre, cerrado')
       .eq('car_wash_id', carWash.id) as { data: any[] | null };
     businessHours = bh ?? [];
   }
 
-  const hoursByDay = Object.fromEntries(businessHours.map((bh: any) => [bh.day_of_week, bh]));
+  const hoursByDay = Object.fromEntries(businessHours.map((bh: any) => [bh.dia_semana, bh]));
   const numEstaciones = carWash?.num_estaciones ?? 0;
 
   return (
@@ -185,17 +184,17 @@ export default async function ServiciosPage() {
                 </tr>
               </thead>
               <tbody>
-                {DAY_KEYS.map((key, i) => {
-                  const bh = hoursByDay[key];
-                  const abierto = bh?.activo;
+                {DAYS.map((day, i) => {
+                  const bh = hoursByDay[i];
+                  const abierto = bh && !bh.cerrado;
                   return (
-                    <tr key={key} className="border-b border-border last:border-0 hover:bg-muted/30">
-                      <td className="px-6 py-3 font-medium text-foreground">{DAYS[i]}</td>
+                    <tr key={day} className="border-b border-border last:border-0 hover:bg-muted/30">
+                      <td className="px-6 py-3 font-medium text-foreground">{day}</td>
                       <td className="px-6 py-3 font-mono text-muted-foreground">
-                        {bh?.apertura?.slice(0, 5) ?? '—'}
+                        {bh?.hora_apertura?.slice(0, 5) ?? '—'}
                       </td>
                       <td className="px-6 py-3 font-mono text-muted-foreground">
-                        {bh?.cierre?.slice(0, 5) ?? '—'}
+                        {bh?.hora_cierre?.slice(0, 5) ?? '—'}
                       </td>
                       <td className="px-6 py-3">
                         {!bh ? (
