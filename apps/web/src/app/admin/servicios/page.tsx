@@ -4,8 +4,6 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { createService, deleteService, toggleService } from './actions';
 import { HoursForm } from './hours-form';
 
-const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
-
 export default async function ServiciosPage() {
   const supabase = await createServerSupabase();
 
