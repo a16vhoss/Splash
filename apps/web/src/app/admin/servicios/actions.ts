@@ -61,3 +61,39 @@ export async function toggleService(serviceId: string, activo: boolean) {
 
   revalidatePath('/servicios');
 }
+
+export async function saveBusinessHours(formData: FormData) {
+  const supabase = await createServerSupabase();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('No autenticado');
+
+  const { data: carWash } = await supabase
+    .from('car_washes')
+    .select('id')
+    .eq('owner_id', user.id)
+    .single();
+
+  if (!carWash) throw new Error('No se encontro el autolavado');
+
+  for (let dia = 0; dia < 7; dia++) {
+    const cerrado = formData.get(`cerrado_${dia}`) === 'on';
+    const hora_apertura = formData.get(`apertura_${dia}`) as string || '09:00';
+    const hora_cierre = formData.get(`cierre_${dia}`) as string || '18:00';
+
+    await supabase
+      .from('business_hours')
+      .upsert(
+        {
+          car_wash_id: carWash.id,
+          dia_semana: dia,
+          hora_apertura,
+          hora_cierre,
+          cerrado,
+        },
+        { onConflict: 'car_wash_id,dia_semana' }
+      );
+  }
+
+  revalidatePath('/servicios');
+}

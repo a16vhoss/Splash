@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createService, deleteService, toggleService } from './actions';
+import { HoursForm } from './hours-form';
 
 const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
 
@@ -173,50 +174,7 @@ export default async function ServiciosPage() {
       <section className="space-y-4">
         <h3 className="text-base font-semibold text-foreground">Horario de operacion</h3>
         <div className="rounded-card bg-card shadow-card">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left">
-                  <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Dia</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Apertura</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Cierre</th>
-                  <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {DAYS.map((day, i) => {
-                  const bh = hoursByDay[i];
-                  const abierto = bh && !bh.cerrado;
-                  return (
-                    <tr key={day} className="border-b border-border last:border-0 hover:bg-muted/30">
-                      <td className="px-6 py-3 font-medium text-foreground">{day}</td>
-                      <td className="px-6 py-3 font-mono text-muted-foreground">
-                        {bh?.hora_apertura?.slice(0, 5) ?? '—'}
-                      </td>
-                      <td className="px-6 py-3 font-mono text-muted-foreground">
-                        {bh?.hora_cierre?.slice(0, 5) ?? '—'}
-                      </td>
-                      <td className="px-6 py-3">
-                        {!bh ? (
-                          <span className="rounded-pill bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
-                            Sin configurar
-                          </span>
-                        ) : abierto ? (
-                          <span className="rounded-pill bg-accent/10 px-2.5 py-0.5 text-xs font-semibold text-accent">
-                            Abierto
-                          </span>
-                        ) : (
-                          <span className="rounded-pill bg-destructive/10 px-2.5 py-0.5 text-xs font-semibold text-destructive">
-                            Cerrado
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <HoursForm hoursByDay={hoursByDay} />
         </div>
       </section>
 
