@@ -34,5 +34,19 @@ export async function completeAppointment(appointmentId: string) {
     .update({ estado: 'completed' })
     .eq('id', appointmentId);
 
-  revalidatePath('/citas');
+  revalidatePath('/admin/citas');
+}
+
+export async function markAsPaid(appointmentId: string) {
+  const supabase = await createServerSupabase();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('No autenticado');
+
+  await supabase
+    .from('appointments')
+    .update({ estado_pago: 'pagado' })
+    .eq('id', appointmentId);
+
+  revalidatePath('/admin/citas');
 }
