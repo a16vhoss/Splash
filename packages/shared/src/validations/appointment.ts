@@ -6,6 +6,7 @@ export const createAppointmentSchema = z.object({
   fecha: z.string().date(),
   hora_inicio: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Formato HH:mm'),
   notas_cliente: z.string().max(500).optional(),
+  servicios_complementarios: z.array(z.string().uuid()).optional(),
 });
 
 export const cancelAppointmentSchema = z.object({

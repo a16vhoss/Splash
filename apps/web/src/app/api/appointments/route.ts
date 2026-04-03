@@ -52,9 +52,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Servicio no disponible' }, { status: 422 });
   }
 
+  // Fetch complementary services if provided
+  let complementaryServices: any[] = [];
+  let totalDuration = service.duracion_min;
+  let totalPrice = service.precio;
+
+  if ((parsed.data as any).servicios_complementarios?.length) {
+    const { data: compServices } = await supabase
+      .from('services')
+      .select('id, nombre, precio, duracion_min')
+      .in('id', (parsed.data as any).servicios_complementarios)
+      .eq('car_wash_id', car_wash_id)
+      .eq('es_complementario', true)
+      .eq('activo', true);
+
+    if (compServices) {
+      complementaryServices = compServices;
+      totalDuration += compServices.reduce((sum: number, s: any) => sum + s.duracion_min, 0);
+      totalPrice += compServices.reduce((sum: number, s: any) => sum + s.precio, 0);
+    }
+  }
+
   // 4. Calculate hora_fin
   const startMinutes = timeToMinutes(hora_inicio);
-  const hora_fin = minutesToTime(startMinutes + service.duracion_min);
+  const hora_fin = minutesToTime(startMinutes + totalDuration);
 
   // 5. Get car wash
   const { data: carWash, error: carWashError } = await supabase
@@ -117,7 +138,11 @@ export async function POST(request: NextRequest) {
       hora_inicio,
       hora_fin,
       estacion,
-      precio_cobrado: service.precio,
+      precio_cobrado: totalPrice,
+      precio_total: totalPrice,
+      servicios_complementarios: complementaryServices.length > 0
+        ? complementaryServices.map((s: any) => ({ id: s.id, nombre: s.nombre, precio: s.precio, duracion_min: s.duracion_min }))
+        : null,
       estado: 'confirmed',
       notas_cliente: notas_cliente ?? null,
     })

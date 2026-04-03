@@ -92,14 +92,33 @@ export default async function CarWashProfilePage({
           {/* Services */}
           <section>
             <h2 className="text-xl font-bold text-foreground mb-4">Servicios</h2>
-            {services && services.length > 0 ? (
+            {services && services.filter((s: any) => !s.es_complementario).length > 0 ? (
               <div className="space-y-3">
-                {services.map((service: any) => (
+                {services.filter((s: any) => !s.es_complementario).map((service: any) => (
                   <ServiceCard key={service.id} service={service} carWashId={carWash.id} />
                 ))}
               </div>
             ) : (
               <p className="text-muted-foreground">No hay servicios disponibles.</p>
+            )}
+
+            {services && services.some((s: any) => s.es_complementario) && (
+              <div className="mt-6">
+                <h3 className="text-lg font-bold text-foreground mb-3">Servicios complementarios</h3>
+                <p className="text-sm text-muted-foreground mb-3">Agrega extras al agendar tu cita</p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {services.filter((s: any) => s.es_complementario).map((svc: any) => (
+                    <div key={svc.id} className="rounded-card border border-border p-4">
+                      <div className="font-medium text-foreground">{svc.nombre}</div>
+                      {svc.descripcion && <p className="text-xs text-muted-foreground mt-1">{svc.descripcion}</p>}
+                      <div className="flex items-center gap-3 mt-2 text-sm">
+                        <span className="font-bold text-foreground">+${Number(svc.precio).toLocaleString('es-MX')}</span>
+                        <span className="text-muted-foreground">{svc.duracion_min} min</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </section>
 
