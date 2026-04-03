@@ -39,6 +39,27 @@ export async function POST(request: NextRequest) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      // Appointment payment (has appointment_id in metadata)
+      if (session.metadata?.appointment_id) {
+        const appointmentId = session.metadata.appointment_id;
+        const paymentIntentId = typeof session.payment_intent === 'string'
+          ? session.payment_intent
+          : (session.payment_intent as any)?.id;
+
+        await supabase
+          .from('appointments')
+          .update({
+            estado_pago: 'pagado',
+            stripe_payment_id: paymentIntentId ?? null,
+            stripe_checkout_session_id: session.id,
+          })
+          .eq('id', appointmentId);
+
+        break;
+      }
+
+      // Subscription checkout
       const { car_wash_id, plan } = session.metadata ?? {};
 
       if (!car_wash_id || !plan) break;
@@ -123,6 +144,21 @@ export async function POST(request: NextRequest) {
           .eq('id', sub.car_wash_id);
       }
 
+      break;
+    }
+
+    case 'charge.refunded': {
+      const charge = event.data.object as Stripe.Charge;
+      const paymentIntentId = typeof charge.payment_intent === 'string'
+        ? charge.payment_intent
+        : (charge.payment_intent as any)?.id;
+
+      if (paymentIntentId) {
+        await supabase
+          .from('appointments')
+          .update({ estado_pago: 'reembolsado' })
+          .eq('stripe_payment_id', paymentIntentId);
+      }
       break;
     }
 
