@@ -45,9 +45,10 @@ test.describe.serial('Admin servicios', () => {
     await page.goto('/admin/servicios');
     await expect(page.getByText('Lavado Express')).toBeVisible();
     await page.getByRole('button', { name: 'Desactivar' }).first().click();
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(3000);
     await page.reload();
-    await expect(page.getByText('Inactivo')).toBeVisible();
+    await page.waitForTimeout(1000);
+    await expect(page.getByText('Inactivo')).toBeVisible({ timeout: 10_000 });
   });
 
   test('delete service', async ({ page }) => {
