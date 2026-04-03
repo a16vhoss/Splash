@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useRef } from 'react';
 
 type ToastType = 'success' | 'error' | 'info';
 
@@ -18,24 +18,23 @@ export function useToast() {
   return ctx;
 }
 
-let nextId = 0;
+const colors: Record<ToastType, string> = {
+  success: 'bg-accent text-white',
+  error: 'bg-destructive text-white',
+  info: 'bg-primary text-white',
+};
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const nextIdRef = useRef(0);
 
   const addToast = useCallback((message: string, type: ToastType = 'success') => {
-    const id = nextId++;
+    const id = nextIdRef.current++;
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3000);
   }, []);
-
-  const colors: Record<ToastType, string> = {
-    success: 'bg-accent text-white',
-    error: 'bg-destructive text-white',
-    info: 'bg-primary text-white',
-  };
 
   return (
     <ToastContext.Provider value={addToast}>
