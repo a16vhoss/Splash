@@ -19,7 +19,7 @@ export default function MisCitasPage() {
   async function loadAppointments() {
     const { data } = await supabase
       .from('appointments')
-      .select('*, car_washes!car_wash_id(nombre), services!service_id(nombre)')
+      .select('*, car_washes!car_wash_id(nombre, direccion), services!service_id(nombre, duracion_min)')
       .order('fecha', { ascending: false })
       .order('hora_inicio', { ascending: false })
       .limit(50);

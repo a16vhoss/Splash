@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { downloadICS } from '@/lib/calendar';
 
 const statusStyles: Record<string, string> = {
   confirmed: 'bg-primary/10 text-primary',
@@ -56,6 +57,21 @@ export function AppointmentCard({ appointment, onCancel }: AppointmentCardProps)
             className="px-4 py-2 rounded-card border border-destructive text-destructive text-sm font-semibold hover:bg-destructive/5 transition-colors"
           >
             Cancelar cita
+          </button>
+        )}
+        {(appointment.estado === 'confirmed' || appointment.estado === 'in_progress') && (
+          <button
+            onClick={() => downloadICS({
+              title: `Lavado en ${appointment.car_washes?.nombre ?? 'Autolavado'}`,
+              date: appointment.fecha,
+              startTime: appointment.hora_inicio?.slice(0, 5) ?? '09:00',
+              durationMin: appointment.services?.duracion_min ?? 30,
+              location: appointment.car_washes?.direccion ?? undefined,
+              description: `Servicio: ${appointment.services?.nombre ?? ''}\nPrecio: $${appointment.precio_cobrado}`,
+            })}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Agregar al calendario
           </button>
         )}
       </div>
