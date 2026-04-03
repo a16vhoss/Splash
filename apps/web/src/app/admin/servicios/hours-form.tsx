@@ -1,6 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
+import { useToast } from '@/components/toast';
 import { saveBusinessHours } from './actions';
 
 const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
@@ -11,10 +12,16 @@ interface HoursFormProps {
 
 export function HoursForm({ hoursByDay }: HoursFormProps) {
   const [isPending, startTransition] = useTransition();
+  const toast = useToast();
 
   function handleSubmit(formData: FormData) {
-    startTransition(() => {
-      saveBusinessHours(formData);
+    startTransition(async () => {
+      try {
+        await saveBusinessHours(formData);
+        toast('Horarios guardados correctamente');
+      } catch {
+        toast('Error al guardar horarios', 'error');
+      }
     });
   }
 
