@@ -23,7 +23,7 @@ export default async function ServiciosPage() {
   if (carWash) {
     const { data: svcs } = await supabase
       .from('services')
-      .select('id, nombre, descripcion, precio, duracion_min, categoria, activo, orden')
+      .select('id, nombre, descripcion, precio, duracion_min, categoria, es_complementario, activo, orden')
       .eq('car_wash_id', carWash.id)
       .order('orden', { ascending: true }) as { data: any[] | null };
     services = svcs ?? [];
@@ -47,10 +47,17 @@ export default async function ServiciosPage() {
 
       {/* ── Servicios ── */}
       <section className="space-y-4">
-        <h3 className="text-base font-semibold text-foreground">Mis servicios</h3>
+        <h3 className="text-base font-semibold text-foreground">Servicios base</h3>
         <ServiceForm />
-        <ServiceTable services={services} />
+        <ServiceTable services={services.filter((s: any) => !s.es_complementario)} />
       </section>
+
+      {services.some((s: any) => s.es_complementario) && (
+        <section className="space-y-4">
+          <h3 className="text-base font-semibold text-foreground">Servicios complementarios</h3>
+          <ServiceTable services={services.filter((s: any) => s.es_complementario)} />
+        </section>
+      )}
 
       {/* ── Horario de operacion ── */}
       <section className="space-y-4">

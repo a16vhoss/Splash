@@ -11,6 +11,7 @@ interface Service {
   precio: number;
   duracion_min: number;
   categoria: string;
+  es_complementario: boolean;
   activo: boolean;
 }
 
@@ -71,6 +72,11 @@ export function ServiceTable({ services }: { services: Service[] }) {
                   <div className="font-medium text-foreground">{svc.nombre}</div>
                   {svc.descripcion && (
                     <div className="text-xs text-muted-foreground mt-0.5 max-w-[200px] truncate">{svc.descripcion}</div>
+                  )}
+                  {svc.es_complementario && (
+                    <span className="inline-block mt-1 rounded-pill bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                      Complementario
+                    </span>
                   )}
                 </td>
                 <td className="px-6 py-3 text-muted-foreground">${(svc.precio ?? 0).toFixed(2)}</td>
