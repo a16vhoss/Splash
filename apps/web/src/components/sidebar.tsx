@@ -55,7 +55,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-60 flex-col bg-sidebar text-sidebar-foreground shrink-0">
+    <aside className="hidden md:flex h-screen w-60 flex-col bg-sidebar text-sidebar-foreground shrink-0">
       {/* Logo */}
       <div className="flex flex-col gap-0.5 px-6 py-6 border-b border-sidebar-muted">
         <span className="text-xl font-extrabold tracking-tight">Splash</span>
