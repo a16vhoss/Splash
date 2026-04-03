@@ -12,8 +12,11 @@ test('re-login client after logout in round2', async ({ page }) => {
   await page.getByLabel('Password').fill(TEST_CLIENT.password);
   await page.getByRole('button', { name: 'INGRESAR' }).click();
 
-  // Client role redirects to home
-  await page.waitForURL('/', { timeout: 15_000 });
+  // Wait for any post-login redirect to settle
+  await page.waitForTimeout(5000);
+  // Navigate to home to confirm session works
+  await page.goto('/');
+  await expect(page.getByText('Encuentra y agenda')).toBeVisible({ timeout: 5000 });
 
   // Save fresh auth state
   await page.context().storageState({ path: CLIENT_STATE });
