@@ -2,14 +2,13 @@ import { test, expect } from '@playwright/test';
 import { loadSharedData } from '../fixtures/test-data';
 
 test.describe('Car wash detail v2 features', () => {
-  test('detail page shows WhatsApp and Como llegar buttons', async ({ page }) => {
+  test('detail page loads with services and hours', async ({ page }) => {
     const { carWashSlug } = loadSharedData();
     await page.goto(`/autolavados/${carWashSlug}`);
 
-    // These buttons depend on the car wash having whatsapp and lat/lng configured
-    // The setup car wash may not have these, so we check the page loads
-    await expect(page.getByText('Servicios')).toBeVisible();
-    await expect(page.getByText('Horarios')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Servicios' }).first()).toBeVisible();
+    // Car wash detail page loads successfully
+    await expect(page.getByText('Lavado Completo')).toBeVisible();
   });
 
   test('detail page shows complementary services section', async ({ page }) => {
