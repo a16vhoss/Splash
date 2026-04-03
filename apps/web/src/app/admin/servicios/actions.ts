@@ -39,7 +39,7 @@ export async function createService(formData: FormData) {
     orden: 0,
   });
 
-  revalidatePath('/servicios');
+  revalidatePath('/admin/servicios');
 }
 
 export async function deleteService(serviceId: string) {
@@ -50,7 +50,7 @@ export async function deleteService(serviceId: string) {
 
   await supabase.from('services').delete().eq('id', serviceId);
 
-  revalidatePath('/servicios');
+  revalidatePath('/admin/servicios');
 }
 
 export async function toggleService(serviceId: string, activo: boolean) {
@@ -61,7 +61,7 @@ export async function toggleService(serviceId: string, activo: boolean) {
 
   await supabase.from('services').update({ activo }).eq('id', serviceId);
 
-  revalidatePath('/servicios');
+  revalidatePath('/admin/servicios');
 }
 
 export async function saveBusinessHours(formData: FormData) {
@@ -97,5 +97,5 @@ export async function saveBusinessHours(formData: FormData) {
       );
   }
 
-  revalidatePath('/servicios');
+  revalidatePath('/admin/servicios');
 }
