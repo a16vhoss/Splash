@@ -2,6 +2,7 @@ export const PAYMENT_METHODS = {
   efectivo: 'Efectivo',
   tarjeta_sitio: 'Tarjeta en sitio',
   transferencia: 'Transferencia',
+  pago_en_linea: 'Pago en linea',
 } as const;
 
 export type PaymentMethod = keyof typeof PAYMENT_METHODS;

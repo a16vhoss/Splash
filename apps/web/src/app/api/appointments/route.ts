@@ -81,12 +81,22 @@ export async function POST(request: NextRequest) {
   // 5. Get car wash
   const { data: carWash, error: carWashError } = await supabase
     .from('car_washes')
-    .select('nombre, direccion, num_estaciones, activo, verificado, subscription_status, owner_id')
+    .select('nombre, direccion, num_estaciones, activo, verificado, subscription_status, owner_id, stripe_account_id, stripe_onboarding_complete')
     .eq('id', car_wash_id)
     .single();
 
   if (carWashError || !carWash) {
     return NextResponse.json({ error: 'Car wash no encontrado' }, { status: 404 });
+  }
+
+  // Validate online payment capability
+  if ((parsed.data as any).metodo_pago === 'pago_en_linea') {
+    if (!carWash.stripe_account_id || !carWash.stripe_onboarding_complete) {
+      return NextResponse.json(
+        { error: 'Este autolavado no acepta pagos en linea' },
+        { status: 400 }
+      );
+    }
   }
 
   // 6. Validate car wash availability

@@ -70,6 +70,22 @@ export default function AgendarPage() {
       return;
     }
 
+    const appointmentData = await res.json();
+
+    if (paymentMethod === 'pago_en_linea') {
+      const checkoutRes = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointment_id: appointmentData.appointment.id }),
+      });
+
+      const checkoutData = await checkoutRes.json();
+      if (checkoutData.url) {
+        window.location.href = checkoutData.url;
+        return;
+      }
+    }
+
     router.push('/mis-citas?success=1');
   }
 
@@ -146,6 +162,7 @@ export default function AgendarPage() {
                 efectivo: 'Efectivo (pago en sitio)',
                 tarjeta_sitio: 'Tarjeta (pago en sitio)',
                 transferencia: 'Transferencia bancaria',
+                pago_en_linea: 'Pagar ahora con tarjeta',
               };
               return (
                 <label key={method} className="flex items-center gap-3 rounded-card border border-border p-3 cursor-pointer hover:bg-muted/30 transition-colors">
