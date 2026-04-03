@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { NotificationBell } from '@/components/notification-bell';
 
 export function Navbar() {
   const [user, setUser] = useState<any>(null);
@@ -58,6 +59,8 @@ export function Navbar() {
         {/* Right side */}
         <div className="hidden md:flex items-center gap-3">
           {user ? (
+            <>
+            <NotificationBell />
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -81,6 +84,7 @@ export function Navbar() {
                 </div>
               )}
             </div>
+            </>
           ) : (
             <Link href="/login" className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 transition-opacity">
               Iniciar sesion
