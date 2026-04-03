@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createAppointmentSchema, NotifType, SubStatus } from '@splash/shared';
+import { sendBookingConfirmationClient, sendBookingConfirmationAdmin } from '@/lib/email';
 
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
   // 3. Get service
   const { data: service, error: serviceError } = await supabase
     .from('services')
-    .select('duracion_min, precio, activo')
+    .select('nombre, duracion_min, precio, activo')
     .eq('id', service_id)
     .single();
 
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
   // 5. Get car wash
   const { data: carWash, error: carWashError } = await supabase
     .from('car_washes')
-    .select('num_estaciones, activo, verificado, subscription_status, owner_id')
+    .select('nombre, direccion, num_estaciones, activo, verificado, subscription_status, owner_id')
     .eq('id', car_wash_id)
     .single();
 
@@ -175,6 +176,40 @@ export async function POST(request: NextRequest) {
   ];
 
   await supabase.from('notifications').insert(notifications);
+
+  // Send confirmation emails (fire-and-forget)
+  const { data: clientUser } = await supabase
+    .from('users')
+    .select('email, nombre')
+    .eq('id', user.id)
+    .single();
+
+  const { data: ownerUser } = await supabase
+    .from('users')
+    .select('email')
+    .eq('id', carWash.owner_id)
+    .single();
+
+  if (clientUser?.email) {
+    sendBookingConfirmationClient(clientUser.email, {
+      carWashName: carWash.nombre,
+      serviceName: service.nombre,
+      fecha,
+      hora: hora_inicio,
+      precio: String(totalPrice),
+      direccion: carWash.direccion ?? '',
+    });
+  }
+
+  if (ownerUser?.email) {
+    sendBookingConfirmationAdmin(ownerUser.email, {
+      clientName: clientUser?.nombre ?? 'Cliente',
+      serviceName: service.nombre,
+      fecha,
+      hora: hora_inicio,
+      precio: String(totalPrice),
+    });
+  }
 
   // 11. Return 201
   return NextResponse.json({ appointment }, { status: 201 });

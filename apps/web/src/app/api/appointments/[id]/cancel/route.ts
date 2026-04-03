@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { CANCELLATION_HOURS_LIMIT, NotifType } from '@splash/shared';
+import { sendCancellationEmail } from '@/lib/email';
 
 export async function POST(
   request: NextRequest,
@@ -18,7 +19,7 @@ export async function POST(
   // 2. Get appointment
   const { data: appointment, error: fetchError } = await supabase
     .from('appointments')
-    .select('id, client_id, car_wash_id, fecha, hora_inicio, estado, car_washes(owner_id)')
+    .select('id, client_id, car_wash_id, service_id, fecha, hora_inicio, estado, car_washes(owner_id, nombre), services(nombre)')
     .eq('id', id)
     .single();
 
@@ -31,7 +32,8 @@ export async function POST(
   }
 
   const isClient = user.id === appointment.client_id;
-  const carWash = appointment.car_washes as unknown as { owner_id: string } | null;
+  const carWash = appointment.car_washes as unknown as { owner_id: string; nombre: string } | null;
+  const service = appointment.services as unknown as { nombre: string } | null;
   const isAdmin = carWash ? user.id === carWash.owner_id : false;
 
   if (!isClient && !isAdmin) {
@@ -90,6 +92,34 @@ export async function POST(
         : `Tu cita del ${appointment.fecha} a las ${appointment.hora_inicio} fue cancelada.`,
       leida: false,
     });
+  }
+
+  // Send cancellation emails (fire-and-forget)
+  const { data: clientUser } = await supabase
+    .from('users')
+    .select('email')
+    .eq('id', appointment.client_id)
+    .single();
+
+  const { data: ownerUser } = await supabase
+    .from('users')
+    .select('email')
+    .eq('id', carWash?.owner_id ?? '')
+    .single();
+
+  const cancelEmailData = {
+    carWashName: carWash?.nombre ?? '',
+    serviceName: service?.nombre ?? '',
+    fecha: appointment.fecha,
+    hora: appointment.hora_inicio?.slice(0, 5) ?? '',
+    motivo: motivo_cancelacion ?? '',
+  };
+
+  if (clientUser?.email) {
+    sendCancellationEmail(clientUser.email, { ...cancelEmailData, isAdmin: false });
+  }
+  if (ownerUser?.email) {
+    sendCancellationEmail(ownerUser.email, { ...cancelEmailData, isAdmin: true });
   }
 
   return NextResponse.json({ success: true });
