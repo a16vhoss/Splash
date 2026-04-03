@@ -5,11 +5,13 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { AppointmentCard } from '@/components/appointment-card';
+import { useToast } from '@/components/toast';
 
 export default function MisCitasPage() {
   const searchParams = useSearchParams();
   const success = searchParams.get('success');
   const supabase = createClient();
+  const toast = useToast();
 
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,10 +43,11 @@ export default function MisCitasPage() {
     });
 
     if (res.ok) {
+      toast('Cita cancelada');
       loadAppointments();
     } else {
       const data = await res.json();
-      alert(data.error ?? 'Error al cancelar');
+      toast(data.error ?? 'Error al cancelar', 'error');
     }
   }
 

@@ -5,11 +5,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { StarRatingInput } from '@/components/star-rating-input';
+import { useToast } from '@/components/toast';
 
 export default function CalificarPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const supabase = createClient();
+  const toast = useToast();
 
   const [appointment, setAppointment] = useState<any>(null);
   const [rating, setRating] = useState(0);
@@ -53,6 +55,7 @@ export default function CalificarPage() {
       return;
     }
 
+    toast('Evaluacion enviada, gracias');
     router.push('/mis-citas');
   }
 
