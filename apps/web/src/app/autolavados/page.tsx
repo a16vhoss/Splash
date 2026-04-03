@@ -4,6 +4,7 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { WashCard } from '@/components/wash-card';
+import { AutolavadosMap } from './autolavados-client';
 
 export default async function AutolavadosPage({
   searchParams,
@@ -15,7 +16,7 @@ export default async function AutolavadosPage({
 
   let query = supabase
     .from('car_washes')
-    .select('id, nombre, slug, direccion, rating_promedio, total_reviews, logo_url')
+    .select('id, nombre, slug, direccion, rating_promedio, total_reviews, logo_url, latitud, longitud')
     .eq('activo', true)
     .eq('verificado', true)
     .in('subscription_status', ['trial', 'active'])
@@ -54,11 +55,16 @@ export default async function AutolavadosPage({
         </div>
 
         {washes && washes.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {washes.map((wash: any) => (
-              <WashCard key={wash.id} wash={wash} />
-            ))}
-          </div>
+          <>
+            <AutolavadosMap carWashes={washes} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {washes.map((wash: any) => (
+                <div key={wash.slug} id={`wash-${wash.slug}`}>
+                  <WashCard wash={wash} />
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <div className="text-center py-16">
             <p className="text-muted-foreground text-lg">No se encontraron autolavados.</p>
