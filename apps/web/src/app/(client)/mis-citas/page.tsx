@@ -61,6 +61,18 @@ export default function MisCitasPage() {
         </div>
       )}
 
+      {searchParams.get('payment') === 'success' && (
+        <div className="rounded-card bg-accent/10 border border-accent/20 px-4 py-3 mb-6">
+          <p className="text-sm text-accent font-semibold">Pago realizado exitosamente.</p>
+        </div>
+      )}
+
+      {searchParams.get('payment') === 'cancelled' && (
+        <div className="rounded-card bg-warning/10 border border-warning/20 px-4 py-3 mb-6">
+          <p className="text-sm text-warning font-semibold">Pago cancelado. Puedes intentar de nuevo desde tus citas.</p>
+        </div>
+      )}
+
       {loading ? (
         <div className="flex justify-center py-16">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />

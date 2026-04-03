@@ -37,9 +37,22 @@ export function AppointmentCard({ appointment, onCancel }: AppointmentCardProps)
             {appointment.fecha} &middot; {appointment.hora_inicio} &middot; ${Number(appointment.precio_cobrado).toLocaleString('es-MX')}
           </p>
         </div>
-        <span className={`rounded-pill px-2.5 py-0.5 text-xs font-semibold ${statusColor}`}>
-          {statusLabels[appointment.estado] ?? appointment.estado}
-        </span>
+        <div className="flex flex-col items-end gap-1">
+          <span className={`rounded-pill px-2.5 py-0.5 text-xs font-semibold ${statusColor}`}>
+            {statusLabels[appointment.estado] ?? appointment.estado}
+          </span>
+          {appointment.metodo_pago === 'pago_en_linea' && (
+            <span className={
+              appointment.estado_pago === 'pagado'
+                ? 'rounded-pill bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent'
+                : appointment.estado_pago === 'reembolsado'
+                  ? 'rounded-pill bg-warning/10 px-2 py-0.5 text-[10px] font-semibold text-warning'
+                  : 'rounded-pill bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground'
+            }>
+              {appointment.estado_pago === 'pagado' ? 'Pagado en linea' : appointment.estado_pago === 'reembolsado' ? 'Reembolsado' : 'Pago pendiente'}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-2 mt-4">
