@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe.serial('Admin configuracion (v2 features)', () => {
   test('configuracion page loads with payment methods', async ({ page }) => {
     await page.goto('/admin/configuracion');
-    await expect(page.getByText('Configuracion')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Configuracion' })).toBeVisible();
     await expect(page.getByText('Metodos de pago aceptados')).toBeVisible();
     await expect(page.getByRole('checkbox', { name: 'Efectivo' })).toBeVisible();
     await expect(page.getByRole('checkbox', { name: 'Tarjeta en sitio' })).toBeVisible();
