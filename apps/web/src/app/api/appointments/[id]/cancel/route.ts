@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { CANCELLATION_HOURS_LIMIT, NotifType } from '@splash/shared';
 import { sendCancellationEmail } from '@/lib/email';
@@ -19,7 +20,7 @@ export async function POST(
   // 2. Get appointment
   const { data: appointment, error: fetchError } = await supabase
     .from('appointments')
-    .select('id, client_id, car_wash_id, service_id, fecha, hora_inicio, estado, car_washes(owner_id, nombre), services(nombre)')
+    .select('id, client_id, car_wash_id, service_id, fecha, hora_inicio, estado, estado_pago, stripe_payment_id, car_washes(owner_id, nombre), services(nombre)')
     .eq('id', id)
     .single();
 
@@ -76,6 +77,24 @@ export async function POST(
 
   if (updateError) {
     return NextResponse.json({ error: 'Error al cancelar cita' }, { status: 500 });
+  }
+
+  // Refund if paid online
+  if (appointment.estado_pago === 'pagado' && appointment.stripe_payment_id) {
+    try {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+      await stripe.refunds.create({
+        payment_intent: appointment.stripe_payment_id,
+      });
+
+      await supabase
+        .from('appointments')
+        .update({ estado_pago: 'reembolsado' })
+        .eq('id', id);
+    } catch (err) {
+      console.error('[stripe] Refund failed:', err);
+      // Don't block cancellation if refund fails
+    }
   }
 
   // 5. Notify the other party
