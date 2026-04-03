@@ -59,5 +59,21 @@ export default defineConfig({
         storageState: './e2e/.auth/client.json',
       },
     },
+    {
+      name: 'admin-round3',
+      testDir: './e2e/admin-round3',
+      dependencies: ['client-round2'],
+      use: {
+        storageState: './e2e/.auth/wash-admin.json',
+      },
+    },
+    {
+      name: 'client-round3',
+      testDir: './e2e/client-round3',
+      dependencies: ['admin-round3'],
+      use: {
+        storageState: './e2e/.auth/client.json',
+      },
+    },
   ],
 });
