@@ -145,6 +145,8 @@ export async function POST(request: NextRequest) {
         ? complementaryServices.map((s: any) => ({ id: s.id, nombre: s.nombre, precio: s.precio, duracion_min: s.duracion_min }))
         : null,
       estado: 'confirmed',
+      metodo_pago: (parsed.data as any).metodo_pago ?? null,
+      estado_pago: 'pendiente',
       notas_cliente: notas_cliente ?? null,
     })
     .select()

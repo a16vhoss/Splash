@@ -21,15 +21,20 @@ export default function AgendarPage() {
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<string>('');
+  const [availableMethods, setAvailableMethods] = useState<string[]>([]);
 
   useEffect(() => {
     if (!carWashId || !serviceId) return;
     Promise.all([
       supabase.from('services').select('nombre, precio, duracion_min').eq('id', serviceId).single(),
-      supabase.from('car_washes').select('nombre, direccion').eq('id', carWashId).single(),
+      supabase.from('car_washes').select('nombre, direccion, metodos_pago').eq('id', carWashId).single(),
     ]).then(([sRes, cwRes]) => {
       setService(sRes.data);
       setCarWash(cwRes.data);
+      const methods = cwRes.data?.metodos_pago ?? ['efectivo'];
+      setAvailableMethods(methods);
+      if (methods.length === 1) setPaymentMethod(methods[0]);
       setLoading(false);
     });
     supabase.from('services').select('id, nombre, precio, duracion_min').eq('car_wash_id', carWashId).eq('es_complementario', true).eq('activo', true).then(({ data }) => setComplementaryServices(data ?? []));
@@ -54,6 +59,7 @@ export default function AgendarPage() {
         fecha,
         hora_inicio: hora,
         servicios_complementarios: selectedExtras.length > 0 ? selectedExtras : undefined,
+        metodo_pago: paymentMethod || undefined,
       }),
     });
 
@@ -126,6 +132,35 @@ export default function AgendarPage() {
           </div>
           <div className="mt-3 text-right text-sm font-semibold text-foreground">
             Total: ${(Number(service?.precio ?? 0) + complementaryServices.filter((e: any) => selectedExtras.includes(e.id)).reduce((sum: number, e: any) => sum + e.precio, 0)).toLocaleString('es-MX')}
+          </div>
+        </div>
+      )}
+
+      {/* Payment method selection */}
+      {availableMethods.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-lg font-bold text-foreground mb-3">Metodo de pago</h3>
+          <div className="space-y-2">
+            {availableMethods.map((method: string) => {
+              const labels: Record<string, string> = {
+                efectivo: 'Efectivo (pago en sitio)',
+                tarjeta_sitio: 'Tarjeta (pago en sitio)',
+                transferencia: 'Transferencia bancaria',
+              };
+              return (
+                <label key={method} className="flex items-center gap-3 rounded-card border border-border p-3 cursor-pointer hover:bg-muted/30 transition-colors">
+                  <input
+                    type="radio"
+                    name="metodo_pago"
+                    value={method}
+                    checked={paymentMethod === method}
+                    onChange={() => setPaymentMethod(method)}
+                    className="h-4 w-4 border-border text-primary focus:ring-ring"
+                  />
+                  <span className="text-sm font-medium text-foreground">{labels[method] ?? method}</span>
+                </label>
+              );
+            })}
           </div>
         </div>
       )}
