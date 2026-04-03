@@ -10,7 +10,7 @@ export default async function ConfiguracionPage() {
 
   const { data: carWash } = await supabase
     .from('car_washes')
-    .select('id, metodos_pago, whatsapp, latitud, longitud')
+    .select('id, metodos_pago, whatsapp, latitud, longitud, stripe_account_id, stripe_onboarding_complete')
     .eq('owner_id', user.id)
     .single() as { data: any };
 
