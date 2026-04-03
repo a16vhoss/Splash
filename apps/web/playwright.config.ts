@@ -68,9 +68,15 @@ export default defineConfig({
       },
     },
     {
+      name: 'client-relogin',
+      testDir: './e2e/client-relogin',
+      dependencies: ['admin-round3'],
+      // No storageState — fresh browser for re-login
+    },
+    {
       name: 'client-round3',
       testDir: './e2e/client-round3',
-      dependencies: ['admin-round3'],
+      dependencies: ['client-relogin'],
       use: {
         storageState: './e2e/.auth/client.json',
       },

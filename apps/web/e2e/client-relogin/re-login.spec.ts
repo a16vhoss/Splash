@@ -1,0 +1,17 @@
+import { test, expect } from '@playwright/test';
+import { TEST_CLIENT, CLIENT_STATE } from '../fixtures/test-data';
+
+test('re-login client after logout in round2', async ({ page }) => {
+  await page.goto('/login');
+
+  // Fill login form
+  await page.getByLabel('Email').fill(TEST_CLIENT.email);
+  await page.getByLabel('Password').fill(TEST_CLIENT.password);
+  await page.getByRole('button', { name: 'INGRESAR' }).click();
+
+  // Wait for redirect to home
+  await page.waitForURL('/', { timeout: 15_000 });
+
+  // Save fresh auth state
+  await page.context().storageState({ path: CLIENT_STATE });
+});
