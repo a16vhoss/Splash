@@ -7,8 +7,10 @@ import { deleteService, toggleService } from './actions';
 interface Service {
   id: string;
   nombre: string;
+  descripcion: string | null;
   precio: number;
   duracion_min: number;
+  categoria: string;
   activo: boolean;
 }
 
@@ -57,6 +59,7 @@ export function ServiceTable({ services }: { services: Service[] }) {
               <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Nombre</th>
               <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Precio</th>
               <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Duracion</th>
+              <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Categoria</th>
               <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Estado</th>
               <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Acciones</th>
             </tr>
@@ -64,9 +67,15 @@ export function ServiceTable({ services }: { services: Service[] }) {
           <tbody>
             {services.map((svc) => (
               <tr key={svc.id} className="border-b border-border last:border-0 hover:bg-muted/30">
-                <td className="px-6 py-3 font-medium text-foreground">{svc.nombre}</td>
+                <td className="px-6 py-3">
+                  <div className="font-medium text-foreground">{svc.nombre}</div>
+                  {svc.descripcion && (
+                    <div className="text-xs text-muted-foreground mt-0.5 max-w-[200px] truncate">{svc.descripcion}</div>
+                  )}
+                </td>
                 <td className="px-6 py-3 text-muted-foreground">${(svc.precio ?? 0).toFixed(2)}</td>
                 <td className="px-6 py-3 text-muted-foreground">{svc.duracion_min} min</td>
+                <td className="px-6 py-3 text-muted-foreground capitalize">{svc.categoria}</td>
                 <td className="px-6 py-3">
                   <span
                     className={

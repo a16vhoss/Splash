@@ -23,7 +23,7 @@ export default async function ServiciosPage() {
   if (carWash) {
     const { data: svcs } = await supabase
       .from('services')
-      .select('id, nombre, precio, duracion_min, activo, orden')
+      .select('id, nombre, descripcion, precio, duracion_min, categoria, activo, orden')
       .eq('car_wash_id', carWash.id)
       .order('orden', { ascending: true }) as { data: any[] | null };
     services = svcs ?? [];

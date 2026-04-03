@@ -23,6 +23,7 @@ export async function createService(formData: FormData) {
     descripcion: (formData.get('descripcion') as string) || null,
     precio: parseFloat(formData.get('precio') as string),
     duracion_min: parseInt(formData.get('duracion_min') as string, 10),
+    categoria: (formData.get('categoria') as string) || 'lavado',
     activo: true,
   };
 
