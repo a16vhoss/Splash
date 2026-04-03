@@ -44,6 +44,7 @@ const tabs = [
 
 const moreItems = [
   { label: 'Reportes', href: '/admin/reportes' },
+  { label: 'Configuracion', href: '/admin/configuracion' },
   { label: 'Suscripcion', href: '/admin/suscripcion' },
 ];
 
