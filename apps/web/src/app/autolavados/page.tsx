@@ -3,67 +3,91 @@ export const dynamic = 'force-dynamic';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
-import { WashCard } from '@/components/wash-card';
-import { AutolavadosMap } from './autolavados-client';
+import { WashCardHorizontal } from '@/components/wash-card-horizontal';
+import { SearchBar } from '@/components/search-bar';
+import { FilterPills } from '@/components/filter-pills';
+import { ListingMapSection } from './listing-client';
 
 export default async function AutolavadosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; rating?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    fecha?: string;
+    hora?: string;
+    vehiculo?: string;
+    rating?: string;
+    sort?: string;
+    categoria?: string;
+  }>;
 }) {
   const params = await searchParams;
   const supabase = await createServerSupabase();
 
   let query = supabase
     .from('car_washes')
-    .select('id, nombre, slug, direccion, rating_promedio, total_reviews, logo_url, latitud, longitud')
+    .select('id, nombre, slug, direccion, rating_promedio, total_reviews, logo_url, fotos, latitud, longitud')
     .eq('activo', true)
-    .in('subscription_status', ['trial', 'active'])
-    .order('rating_promedio', { ascending: false });
+    .in('subscription_status', ['trial', 'active']);
 
   if (params.q) {
-    query = query.ilike('nombre', `%${params.q}%`);
+    query = query.or(`nombre.ilike.%${params.q}%,direccion.ilike.%${params.q}%`);
   }
   if (params.rating) {
     query = query.gte('rating_promedio', Number(params.rating));
   }
+
+  // Sort
+  const sort = params.sort || 'rating';
+  if (sort === 'rating') query = query.order('rating_promedio', { ascending: false });
+  else if (sort === 'reviews') query = query.order('total_reviews', { ascending: false });
+  else if (sort === 'name') query = query.order('nombre', { ascending: true });
+  else query = query.order('rating_promedio', { ascending: false });
 
   const { data: washes } = await query.limit(50);
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <h1 className="text-2xl font-bold text-foreground">
-            {params.q ? `Resultados para "${params.q}"` : 'Todos los autolavados'}
-          </h1>
-          {/* Search form */}
-          <form action="/autolavados" className="flex gap-2">
-            <input
-              name="q"
-              type="text"
-              defaultValue={params.q ?? ''}
-              placeholder="Buscar..."
-              className="px-3 py-2 rounded-card border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary w-64"
-            />
-            <button type="submit" className="px-4 py-2 rounded-card bg-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity">
-              Buscar
-            </button>
-          </form>
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-6 w-full">
+        {/* Search refinement */}
+        <div className="mb-4">
+          <SearchBar
+            variant="compact"
+            defaultQuery={params.q}
+            defaultFecha={params.fecha}
+            defaultHora={params.hora}
+            defaultVehiculo={params.vehiculo}
+          />
         </div>
 
+        {/* Filters */}
+        <div className="mb-6">
+          <FilterPills />
+        </div>
+
+        {/* Results info */}
+        <p className="text-sm text-muted-foreground mb-4">
+          {washes?.length ?? 0} autolavados encontrados
+          {params.q ? ` para "${params.q}"` : ''}
+        </p>
+
         {washes && washes.length > 0 ? (
-          <>
-            <AutolavadosMap carWashes={washes} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="flex gap-6">
+            {/* Cards column */}
+            <div className="flex-1 min-w-0 space-y-3">
               {washes.map((wash: any) => (
-                <div key={wash.slug} id={`wash-${wash.slug}`}>
-                  <WashCard wash={wash} />
-                </div>
+                <WashCardHorizontal key={wash.id} wash={wash} />
               ))}
             </div>
-          </>
+
+            {/* Map column - hidden on mobile */}
+            <div className="hidden lg:block w-[400px] flex-shrink-0">
+              <div className="sticky top-6">
+                <ListingMapSection carWashes={washes} />
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="text-center py-16">
             <p className="text-muted-foreground text-lg">No se encontraron autolavados.</p>
