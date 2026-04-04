@@ -105,10 +105,12 @@ export function CarWashMap({ carWashes, userLocation, onMarkerClick }: CarWashMa
       })
         .bindPopup('Tu ubicación')
         .addTo(map);
-      bounds.extend([userLocation.lat, userLocation.lng]);
     }
 
-    if (bounds.isValid()) {
+    // If user location is available, center on it at close zoom
+    if (userLocation) {
+      map.setView([userLocation.lat, userLocation.lng], 14);
+    } else if (bounds.isValid()) {
       map.fitBounds(bounds, { padding: [40, 40] });
     }
   }, [carWashes, userLocation, onMarkerClick]);
