@@ -1,94 +1,68 @@
+export const dynamic = 'force-dynamic';
 
-'use client';
+import { createServerSupabase } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { Navbar } from '@/components/navbar';
+import { Footer } from '@/components/footer';
+import { DashboardClient } from './dashboard-client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { AppointmentCard } from '@/components/appointment-card';
-import { useToast } from '@/components/toast';
+export default async function MisCitasPage() {
+  const supabase = await createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
-export default function MisCitasPage() {
-  const searchParams = useSearchParams();
-  const success = searchParams.get('success');
-  const supabase = createClient();
-  const toast = useToast();
+  const { data: userData } = await supabase
+    .from('users')
+    .select('nombre')
+    .eq('id', user.id)
+    .single();
 
-  const [appointments, setAppointments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Upcoming appointments
+  const today = new Date().toISOString().split('T')[0];
+  const { data: upcoming } = await supabase
+    .from('appointments')
+    .select('*, services(nombre), car_washes(nombre, slug, latitud, longitud, whatsapp, fotos)')
+    .eq('client_id', user.id)
+    .in('estado', ['confirmed', 'in_progress'])
+    .gte('fecha', today)
+    .order('fecha')
+    .order('hora_inicio');
 
-  async function loadAppointments() {
-    const { data } = await supabase
-      .from('appointments')
-      .select('*, car_washes!car_wash_id(nombre, direccion), services!service_id(nombre, duracion_min)')
-      .order('fecha', { ascending: false })
-      .order('hora_inicio', { ascending: false })
-      .limit(50);
-    setAppointments(data ?? []);
-    setLoading(false);
-  }
+  // Past appointments
+  const { data: history } = await supabase
+    .from('appointments')
+    .select('*, services(nombre), car_washes(nombre, slug, fotos), reviews!left(id)')
+    .eq('client_id', user.id)
+    .in('estado', ['completed', 'cancelled', 'no_show'])
+    .order('fecha', { ascending: false })
+    .limit(20);
 
-  useEffect(() => { loadAppointments(); }, []);
+  // Favorites
+  const { data: favorites } = await supabase
+    .from('favorites')
+    .select('car_wash_id, car_washes(id, nombre, slug, direccion, rating_promedio, total_reviews, fotos)')
+    .eq('user_id', user.id);
 
-  async function handleCancel(id: string) {
-    const motivo = prompt('Motivo de cancelacion:');
-    if (!motivo) return;
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-
-    const res = await fetch(`/api/appointments/${id}/cancel`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ motivo_cancelacion: motivo }),
-    });
-
-    if (res.ok) {
-      toast('Cita cancelada');
-      loadAppointments();
-    } else {
-      const data = await res.json();
-      toast(data.error ?? 'Error al cancelar', 'error');
-    }
-  }
+  // Loyalty cards
+  const { data: loyaltyCards } = await supabase
+    .from('loyalty_cards')
+    .select('*, car_washes(nombre, slug)')
+    .eq('user_id', user.id)
+    .order('stamps', { ascending: false });
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground mb-6">Mis Citas</h1>
-
-      {success && (
-        <div className="rounded-card bg-accent/10 border border-accent/20 px-4 py-3 mb-6">
-          <p className="text-sm text-accent font-semibold">Cita agendada exitosamente. Recuerda que el pago es en sitio.</p>
-        </div>
-      )}
-
-      {searchParams.get('payment') === 'success' && (
-        <div className="rounded-card bg-accent/10 border border-accent/20 px-4 py-3 mb-6">
-          <p className="text-sm text-accent font-semibold">Pago realizado exitosamente.</p>
-        </div>
-      )}
-
-      {searchParams.get('payment') === 'cancelled' && (
-        <div className="rounded-card bg-warning/10 border border-warning/20 px-4 py-3 mb-6">
-          <p className="text-sm text-warning font-semibold">Pago cancelado. Puedes intentar de nuevo desde tus citas.</p>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="flex justify-center py-16">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : appointments.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-muted-foreground">No tienes citas aun.</p>
-          <a href="/autolavados" className="text-sm text-primary hover:underline mt-2 inline-block">Buscar autolavados</a>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {appointments.map((appt) => (
-            <AppointmentCard key={appt.id} appointment={appt} onCancel={handleCancel} />
-          ))}
-        </div>
-      )}
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-1">
+        <DashboardClient
+          userName={userData?.nombre || 'Usuario'}
+          upcoming={upcoming ?? []}
+          history={history ?? []}
+          favorites={(favorites ?? []).map((f: any) => f.car_washes).filter(Boolean)}
+          loyaltyCards={loyaltyCards ?? []}
+        />
+      </main>
+      <Footer />
     </div>
   );
 }
