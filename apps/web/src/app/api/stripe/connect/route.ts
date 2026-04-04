@@ -1,20 +1,33 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServerSupabase } from '@/lib/supabase/server';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+export async function POST(request: NextRequest) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: 'Stripe no esta configurado' }, { status: 500 });
+  }
 
-export async function POST() {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const supabase = await createServerSupabase();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
 
-  const { data: carWash } = await supabase
+  const body = await request.json().catch(() => ({}));
+  const carWashId = body.car_wash_id;
+
+  let query = supabase
     .from('car_washes')
     .select('id, stripe_account_id, nombre')
-    .eq('owner_id', user.id)
-    .single();
+    .eq('owner_id', user.id);
+
+  if (carWashId) {
+    query = query.eq('id', carWashId);
+  } else {
+    query = query.order('created_at', { ascending: true }).limit(1);
+  }
+
+  const { data: carWash } = await query.single();
 
   if (!carWash) return NextResponse.json({ error: 'No se encontro el autolavado' }, { status: 404 });
 
