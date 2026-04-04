@@ -99,7 +99,26 @@ export default async function DashboardPage() {
             No hay citas proximas
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Mobile card view */}
+          <div className="md:hidden divide-y divide-border">
+            {upcomingAppointments.map((apt: any) => (
+              <div key={apt.id} className="px-4 py-3 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-foreground text-sm">{apt.users?.nombre ?? '—'}</span>
+                  <StatusBadge status={apt.estado} />
+                </div>
+                <p className="text-xs text-muted-foreground">{apt.services?.nombre ?? '—'}</p>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span>{apt.fecha}</span>
+                  <span>{apt.hora_inicio?.slice(0, 5)}</span>
+                  <span>E{apt.estacion}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left">
@@ -131,6 +150,7 @@ export default async function DashboardPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
     </div>

@@ -215,7 +215,7 @@ function StepDate({ onSelectDate }: { onSelectDate: (date: string) => void }) {
   return (
     <div>
       <h2 className="text-lg font-bold text-foreground mb-4">Selecciona una fecha</h2>
-      <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+      <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-7 gap-2">
         {days.map((d) => (
           <button
             key={d.date}

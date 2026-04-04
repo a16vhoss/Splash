@@ -79,11 +79,11 @@ export default async function CarWashProfilePage({
 
         <div className="max-w-6xl mx-auto px-4 py-6">
           {/* Header */}
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">{carWash.nombre}</h1>
               <p className="text-sm text-muted-foreground mt-1">{carWash.direccion}</p>
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
                 <span className="bg-warning/10 text-warning px-2.5 py-0.5 rounded-card text-sm font-bold">
                   ★ {Number(carWash.rating_promedio).toFixed(1)}
                 </span>
@@ -129,7 +129,7 @@ export default async function CarWashProfilePage({
           </div>
 
           {/* Two-column layout */}
-          <div className="flex gap-8">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* Main content */}
             <div className="flex-1 min-w-0 space-y-10">
               {/* Services */}
@@ -138,7 +138,7 @@ export default async function CarWashProfilePage({
                 {mainServices.length > 0 ? (
                   <div className="space-y-3">
                     {mainServices.map((service: any, i: number) => (
-                      <div key={service.id} className="flex items-center justify-between p-4 rounded-modal bg-white border border-border hover:shadow-card transition-shadow">
+                      <div key={service.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-modal bg-white border border-border hover:shadow-card transition-shadow">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <h4 className="font-bold text-foreground">{service.nombre}</h4>
@@ -154,7 +154,7 @@ export default async function CarWashProfilePage({
                         </div>
                         <Link
                           href={`/agendar?car_wash_id=${carWash.id}&service_id=${service.id}`}
-                          className="px-4 py-2 rounded-card bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors whitespace-nowrap ml-4"
+                          className="w-full sm:w-auto text-center px-4 py-2 rounded-card bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors whitespace-nowrap"
                         >
                           Reservar
                         </Link>

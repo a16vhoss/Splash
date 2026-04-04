@@ -95,7 +95,62 @@ export default async function CitasPage({
             No hay citas{estado ? ` con estado "${estado}"` : ''}
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Mobile card view */}
+          <div className="md:hidden divide-y divide-border">
+            {appointments.map((apt: any) => {
+              const clientName = apt.users?.nombre
+                ? apt.users.nombre
+                : apt.notas_cliente?.startsWith('Walk-in:')
+                  ? apt.notas_cliente.slice('Walk-in:'.length).trim()
+                  : apt.notas_cliente === 'Walk-in'
+                    ? 'Walk-in'
+                    : '—';
+              return (
+                <div key={apt.id} className="px-4 py-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-foreground text-sm">{clientName}</span>
+                    <StatusBadge status={apt.estado} />
+                  </div>
+                  <p className="text-xs text-muted-foreground">{apt.services?.nombre ?? '—'}</p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span>{apt.fecha}</span>
+                    <span className="font-mono">{apt.hora_inicio?.slice(0, 5)}</span>
+                    <span>E{apt.estacion}</span>
+                    <span>${(apt.precio_cobrado ?? 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={
+                      apt.estado_pago === 'pagado'
+                        ? 'rounded-pill bg-accent/10 px-2.5 py-0.5 text-xs font-semibold text-accent'
+                        : 'rounded-pill bg-warning/10 px-2.5 py-0.5 text-xs font-semibold text-warning'
+                    }>
+                      {apt.estado_pago === 'pagado' ? 'Pagado' : 'Pendiente'}
+                    </span>
+                    {apt.metodo_pago && (
+                      <span className="text-[11px] text-muted-foreground">{apt.metodo_pago}</span>
+                    )}
+                    {apt.estado_pago !== 'pagado' && apt.estado !== 'cancelled' && (
+                      <form action={markAsPaid.bind(null, apt.id)}>
+                        <button type="submit" className="text-xs font-semibold text-primary hover:underline">
+                          Marcar pagado
+                        </button>
+                      </form>
+                    )}
+                    {(apt.estado === 'confirmed' || apt.estado === 'in_progress') && (
+                      <form action={completeAppointment.bind(null, apt.id)}>
+                        <button type="submit" className="text-xs font-semibold text-accent hover:underline">
+                          Completar
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left">
@@ -174,6 +229,7 @@ export default async function CitasPage({
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
     </div>

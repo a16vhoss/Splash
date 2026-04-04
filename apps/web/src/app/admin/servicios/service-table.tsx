@@ -53,7 +53,60 @@ export function ServiceTable({ services }: { services: Service[] }) {
 
   return (
     <div className="rounded-card bg-card shadow-card">
-      <div className="overflow-x-auto">
+      {/* Mobile card view */}
+      <div className="md:hidden divide-y divide-border">
+        {services.map((svc) => (
+          <div key={svc.id} className="px-4 py-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="font-medium text-foreground text-sm">{svc.nombre}</span>
+                {svc.es_complementario && (
+                  <span className="ml-2 rounded-pill bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    Complementario
+                  </span>
+                )}
+              </div>
+              <span
+                className={
+                  svc.activo
+                    ? 'rounded-pill bg-accent/10 px-2.5 py-0.5 text-xs font-semibold text-accent'
+                    : 'rounded-pill bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground'
+                }
+              >
+                {svc.activo ? 'Activo' : 'Inactivo'}
+              </span>
+            </div>
+            {svc.descripcion && (
+              <p className="text-xs text-muted-foreground line-clamp-2">{svc.descripcion}</p>
+            )}
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="font-semibold text-foreground">${(svc.precio ?? 0).toFixed(2)}</span>
+              <span>{svc.duracion_min} min</span>
+              <span className="capitalize">{svc.categoria}</span>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => handleToggle(svc.id, !svc.activo)}
+                className="text-xs font-semibold text-primary hover:underline disabled:opacity-50"
+              >
+                {svc.activo ? 'Desactivar' : 'Activar'}
+              </button>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => handleDelete(svc.id)}
+                className="text-xs font-semibold text-destructive hover:underline disabled:opacity-50"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left">

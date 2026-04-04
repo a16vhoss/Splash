@@ -42,7 +42,40 @@ export default async function NegociosPage() {
       </div>
 
       <div className="rounded-card bg-card shadow-card overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile card view */}
+        <div className="md:hidden divide-y divide-border">
+          {rows.length === 0 ? (
+            <div className="px-4 py-10 text-center text-muted-foreground">
+              No hay negocios registrados
+            </div>
+          ) : (
+            rows.map((cw: any) => {
+              const status = cw.subscription_status ?? 'trial';
+              return (
+                <div key={cw.id} className="px-4 py-3 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-foreground text-sm">{cw.nombre}</span>
+                    <span
+                      className={`rounded-pill px-2.5 py-0.5 text-xs font-semibold ${
+                        subscriptionStyles[status] ?? 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {subscriptionLabels[status] ?? status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{cw.users?.nombre ?? '—'} · {cw.users?.email ?? ''}</p>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="capitalize">{cw.plan ?? '—'}</span>
+                    <span>{cw.verificado ? 'Verificado' : 'No verificado'}</span>
+                    <span>★ {cw.rating_promedio ? Number(cw.rating_promedio).toFixed(1) : '—'}</span>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+        {/* Desktop table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/30 text-left">

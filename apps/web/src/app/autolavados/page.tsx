@@ -73,7 +73,7 @@ export default async function AutolavadosPage({
         </p>
 
         {washes && washes.length > 0 ? (
-          <div className="flex gap-6">
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
             {/* Cards column */}
             <div className="flex-1 min-w-0 space-y-3">
               {washes.map((wash: any) => (

@@ -79,17 +79,42 @@ Supabase clients are created differently per context:
 
 ### API Routes
 
+**Booking & Availability:**
 - `POST /api/appointments` — Create booking (validates availability, auto-assigns station)
+- `GET /api/appointments` (admin) — `GET /api/admin/appointments`
 - `GET /api/availability?car_wash_id=...&fecha=...&duracion=...` — Available time slots
 - `POST /api/appointments/[id]/cancel` — Cancel appointment (auto-refunds online payments)
+- `POST /api/availability-alerts` / `GET` / `DELETE` — Availability alert CRUD
+
+**Payments (Stripe):**
 - `POST /api/stripe/checkout` — Creates Stripe Checkout session for online payment
-- `POST /api/stripe/connect` — Creates/retrieves Stripe Connect Express account, generates onboarding link
+- `POST /api/stripe/connect` — Creates/retrieves Stripe Connect Express account
 - `POST /api/stripe/connect/callback` — Stripe Connect onboarding callback
 - `POST /api/webhooks/stripe` — Subscription lifecycle + payment events
 
+**Social & Engagement:**
+- `POST /api/favorites` / `GET` — Toggle favorite, list user favorites
+- `GET /api/loyalty?car_wash_id=...` — Loyalty stamp cards
+- `GET /api/messages` / `POST` — Messaging between admin and clients
+- `GET /api/notifications` / `PUT /api/notifications/[id]` / `POST /api/notifications/read-all`
+
+**Admin:**
+- `POST /api/admin/slot-config` — Configure slot duration and capacity per hour/day
+- `POST /api/admin/reviews/[id]/reply` — Admin reply to a review
+- `GET /api/admin/analytics` — Dashboard analytics data
+- `GET /api/my-car-wash` — Current admin's car wash data
+- `GET /api/car-washes` — Public car wash listing
+
+**Cron Jobs** (authenticated via `CRON_SECRET` Bearer token):
+- `/api/cron/reminders` — Appointment reminders
+- `/api/cron/review-requests` — Post-appointment review requests
+- `/api/cron/expire-appointments` — Expire past appointments
+- `/api/cron/check-availability-alerts` — Notify users of new availability
+- `/api/cron/re-engagement` — Re-engagement emails for inactive users
+
 ### Database
 
-Schema in `supabase/migrations/001_initial_schema.sql`. Key tables: `users`, `car_washes`, `services`, `business_hours`, `appointments`, `reviews`, `notifications`, `subscriptions`. RLS policies enforce role-based access. Spanish column names throughout (e.g., `nombre`, `fecha`, `hora_inicio`, `dia_semana`, `precio_cobrado`, `estacion`).
+Schema across `supabase/migrations/`. Core tables: `users`, `car_washes`, `services`, `business_hours`, `appointments`, `reviews`, `notifications`, `subscriptions`. Later migrations add: `slot_capacities`, `favorites`, `availability_alerts`, `loyalty_cards`, `loyalty_rewards`, `messages`. RLS policies enforce role-based access. Spanish column names throughout (e.g., `nombre`, `fecha`, `hora_inicio`, `dia_semana`, `precio_cobrado`, `estacion`).
 
 ### Shared Package
 
@@ -132,6 +157,12 @@ Migrations in `supabase/migrations/`:
 - `004_phase2_features.sql` — Phase 2 features
 - `005_phase3_payments_email.sql` — Payment methods, payment state on appointments, email tracking
 - `006_stripe_connect.sql` — Stripe Connect columns on car_washes and appointments
+- `007_slot_system.sql` — Configurable slot capacities per hour/day (`slot_capacities` table, `slot_duration_min` on car_washes)
+- `008_discovery_phase.sql` — Service categories (`categoria`), car wash photo gallery (`fotos` JSONB)
+- `009_favorites_ratings.sql` — Favorites table, detailed ratings (`rating_servicio`, `rating_limpieza`, `rating_tiempo`, `rating_valor`), cached averages on car_washes
+- `010_booking_postbooking.sql` — Availability alerts (`availability_alerts`), client notes (`notas_cliente`)
+- `011_loyalty_system.sql` — Loyalty stamp cards (`loyalty_cards`, `loyalty_rewards`), loyalty config on car_washes
+- `012_admin_pro.sql` — Review replies (`respuesta_admin`, `respuesta_fecha`), messaging system (`messages` table)
 - `seed.sql` — Seed data
 
 ## Environment Variables
