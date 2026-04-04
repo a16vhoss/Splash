@@ -56,20 +56,22 @@ export default async function CarWashProfilePage({
                 )}
                 {/* Action buttons */}
                 <div className="flex flex-wrap gap-3 mt-4">
-                  {services && services.filter((s: any) => !s.es_complementario).length > 0 && (
-                    <Link
-                      href={`/agendar?car_wash_id=${carWash.id}&service_id=${services.filter((s: any) => !s.es_complementario)[0].id}`}
-                      className="inline-flex items-center gap-2 rounded-card bg-accent px-5 py-2 text-sm font-semibold text-white hover:bg-accent/90 transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                      </svg>
-                      Reservar
-                    </Link>
-                  )}
+                  <Link
+                    href={
+                      services && services.filter((s: any) => !s.es_complementario).length > 0
+                        ? `/agendar?car_wash_id=${carWash.id}&service_id=${services.filter((s: any) => !s.es_complementario)[0].id}`
+                        : `/agendar?car_wash_id=${carWash.id}`
+                    }
+                    className="inline-flex items-center gap-2 rounded-card bg-accent px-5 py-2 text-sm font-semibold text-white hover:bg-accent/90 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    Reservar
+                  </Link>
                   {carWash.latitud && carWash.longitud && (
                     <a
                       href={`https://www.google.com/maps/dir/?api=1&destination=${carWash.latitud},${carWash.longitud}`}
