@@ -114,7 +114,7 @@ export function CarWashMap({ carWashes, userLocation, onMarkerClick }: CarWashMa
   }, [buildMap]);
 
   return (
-    <div className="rounded-card overflow-hidden shadow-card">
+    <div className="rounded-card overflow-hidden shadow-card relative z-0">
       <div ref={mapRef} style={{ width: '100%', height: '300px' }} />
     </div>
   );
