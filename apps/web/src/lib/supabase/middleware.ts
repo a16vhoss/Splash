@@ -81,11 +81,21 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
   // wash_admin subscription check on admin paths
   if (role === 'wash_admin' && pathname.startsWith('/admin') && !pathname.startsWith('/admin/suscripcion')) {
-    const { data: carWash } = await supabase
+    const selectedId = request.cookies.get('selected_car_wash_id')?.value;
+
+    // Build query for the selected car wash, or fallback to first owned
+    let carWashQuery = supabase
       .from('car_washes')
       .select('subscription_status, trial_ends_at')
-      .eq('owner_id', user.id)
-      .single();
+      .eq('owner_id', user.id);
+
+    if (selectedId) {
+      carWashQuery = carWashQuery.eq('id', selectedId);
+    } else {
+      carWashQuery = carWashQuery.order('created_at', { ascending: true }).limit(1);
+    }
+
+    const { data: carWash } = await carWashQuery.single();
 
     if (carWash) {
       const { subscription_status, trial_ends_at } = carWash;

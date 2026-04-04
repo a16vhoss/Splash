@@ -2,20 +2,13 @@
 
 import { revalidatePath } from 'next/cache';
 import { createServerSupabase } from '@/lib/supabase/server';
+import { getAdminCarWash } from '@/lib/admin-car-wash';
 import { serviceSchema } from '@splash/shared';
 
 export async function createService(formData: FormData) {
   const supabase = await createServerSupabase();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('No autenticado');
-
-  const { data: carWash } = await supabase
-    .from('car_washes')
-    .select('id')
-    .eq('owner_id', user.id)
-    .single();
-
+  const carWash = await getAdminCarWash('id');
   if (!carWash) throw new Error('No se encontro el autolavado');
 
   const raw = {
@@ -45,9 +38,6 @@ export async function createService(formData: FormData) {
 export async function deleteService(serviceId: string) {
   const supabase = await createServerSupabase();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('No autenticado');
-
   await supabase.from('services').delete().eq('id', serviceId);
 
   revalidatePath('/admin/servicios');
@@ -55,9 +45,6 @@ export async function deleteService(serviceId: string) {
 
 export async function toggleService(serviceId: string, activo: boolean) {
   const supabase = await createServerSupabase();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('No autenticado');
 
   await supabase.from('services').update({ activo }).eq('id', serviceId);
 
@@ -67,15 +54,7 @@ export async function toggleService(serviceId: string, activo: boolean) {
 export async function saveBusinessHours(formData: FormData) {
   const supabase = await createServerSupabase();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('No autenticado');
-
-  const { data: carWash } = await supabase
-    .from('car_washes')
-    .select('id')
-    .eq('owner_id', user.id)
-    .single();
-
+  const carWash = await getAdminCarWash('id');
   if (!carWash) throw new Error('No se encontro el autolavado');
 
   for (let dia = 0; dia < 7; dia++) {

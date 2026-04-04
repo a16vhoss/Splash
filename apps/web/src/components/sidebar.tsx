@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
 
 const navItems = [
   {
@@ -61,8 +62,25 @@ const navItems = [
   },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  businessName?: string;
+  subscriptionStatus?: string;
+}
+
+export function Sidebar({ businessName, subscriptionStatus }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/');
+    router.refresh();
+  }
+
+  const initials = businessName
+    ? businessName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+    : 'MA';
 
   return (
     <aside className="hidden md:flex h-screen w-60 flex-col bg-sidebar text-sidebar-foreground shrink-0">
@@ -97,12 +115,23 @@ export function Sidebar() {
       {/* Footer */}
       <div className="flex items-center gap-3 px-4 py-4 border-t border-sidebar-muted">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-sidebar-accent text-white text-sm font-bold">
-          MA
+          {initials}
         </div>
-        <div className="flex flex-col min-w-0">
-          <span className="text-sm font-semibold truncate">Mi Autolavado</span>
-          <span className="text-xs text-slate-400">Plan Pro</span>
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="text-sm font-semibold truncate">{businessName ?? 'Mi Autolavado'}</span>
+          <span className="text-xs text-slate-400">{subscriptionStatus ? `Plan ${subscriptionStatus}` : ''}</span>
         </div>
+        <button
+          onClick={handleLogout}
+          title="Cerrar sesion"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-card text-slate-400 hover:bg-sidebar-muted hover:text-white transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </button>
       </div>
     </aside>
   );

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { createServerSupabase } from '@/lib/supabase/server';
+import { getAdminCarWash } from '@/lib/admin-car-wash';
 import { HoursForm } from './hours-form';
 import { ServiceForm } from './service-form';
 import { ServiceTable } from './service-table';
@@ -8,14 +9,7 @@ import { ServiceTable } from './service-table';
 export default async function ServiciosPage() {
   const supabase = await createServerSupabase();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data: carWash } = await supabase
-    .from('car_washes')
-    .select('id, num_estaciones')
-    .eq('owner_id', user.id)
-    .single() as { data: any };
+  const carWash = await getAdminCarWash('id, num_estaciones') as any;
 
   let services: any[] = [];
   let businessHours: any[] = [];

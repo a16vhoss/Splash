@@ -1,18 +1,10 @@
 export const dynamic = 'force-dynamic';
 
-import { createServerSupabase } from '@/lib/supabase/server';
+import { getAdminCarWash } from '@/lib/admin-car-wash';
 import { ConfigForm } from './config-form';
 
 export default async function ConfiguracionPage() {
-  const supabase = await createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data: carWash } = await supabase
-    .from('car_washes')
-    .select('id, metodos_pago, whatsapp, latitud, longitud, stripe_account_id, stripe_onboarding_complete')
-    .eq('owner_id', user.id)
-    .single() as { data: any };
+  const carWash = await getAdminCarWash('id, metodos_pago, whatsapp, latitud, longitud, stripe_account_id, stripe_onboarding_complete') as any;
 
   if (!carWash) return <p className="text-muted-foreground">No se encontro tu autolavado.</p>;
 

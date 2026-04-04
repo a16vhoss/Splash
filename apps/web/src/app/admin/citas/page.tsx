@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { createServerSupabase } from '@/lib/supabase/server';
+import { getAdminCarWash } from '@/lib/admin-car-wash';
 import { StatusBadge } from '@/components/status-badge';
 import { cn } from '@/lib/utils';
 import { completeAppointment, markAsPaid } from './actions';
@@ -22,14 +23,7 @@ export default async function CitasPage({
   const { estado } = await searchParams;
   const supabase = await createServerSupabase();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data: carWash } = await supabase
-    .from('car_washes')
-    .select('id')
-    .eq('owner_id', user.id)
-    .single() as { data: any };
+  const carWash = await getAdminCarWash('id') as any;
 
   let appointments: any[] = [];
 

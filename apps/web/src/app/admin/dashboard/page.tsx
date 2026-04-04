@@ -1,20 +1,13 @@
 export const dynamic = 'force-dynamic';
 
 import { createServerSupabase } from '@/lib/supabase/server';
+import { getAdminCarWash } from '@/lib/admin-car-wash';
 import { MetricCard } from '@/components/metric-card';
 import { StatusBadge } from '@/components/status-badge';
 
 export default async function DashboardPage() {
   const supabase = await createServerSupabase();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data: carWash } = await supabase
-    .from('car_washes')
-    .select('id, nombre, rating_promedio, total_reviews, activo, subscription_status')
-    .eq('owner_id', user.id)
-    .single() as { data: any };
+  const carWash = await getAdminCarWash('id, nombre, rating_promedio, total_reviews, activo, subscription_status') as any;
 
   const today = new Date().toISOString().split('T')[0];
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
@@ -71,7 +64,6 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Dashboard</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{carWash?.nombre ?? 'Tu autolavado'}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

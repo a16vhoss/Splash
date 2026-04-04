@@ -18,7 +18,6 @@ export default async function AutolavadosPage({
     .from('car_washes')
     .select('id, nombre, slug, direccion, rating_promedio, total_reviews, logo_url, latitud, longitud')
     .eq('activo', true)
-    .eq('verificado', true)
     .in('subscription_status', ['trial', 'active'])
     .order('rating_promedio', { ascending: false });
 
