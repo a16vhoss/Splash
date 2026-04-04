@@ -42,7 +42,7 @@ function getNext14Days() {
   return result;
 }
 
-export function BookingWidget({ carWashId, services, carWashName }: BookingWidgetProps) {
+export function BookingWidget({ carWashId, services, carWashName: _carWashName }: BookingWidgetProps) {
   const router = useRouter();
   const mainServices = services.filter((s) => !s.es_complementario);
   const extras = services.filter((s) => s.es_complementario);

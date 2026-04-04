@@ -1,15 +1,9 @@
-'use client';
-
-import { useState } from 'react';
-
 interface BookingBottomBarProps {
   minPrice: number;
   carWashId: string;
 }
 
 export function BookingBottomBar({ minPrice, carWashId }: BookingBottomBarProps) {
-  const [showWidget, setShowWidget] = useState(false);
-
   return (
     <>
       {/* Sticky bottom bar - visible on mobile only */}

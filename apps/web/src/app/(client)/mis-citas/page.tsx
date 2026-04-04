@@ -2,8 +2,6 @@ export const dynamic = 'force-dynamic';
 
 import { createServerSupabase } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
 import { DashboardClient } from './dashboard-client';
 
 export default async function MisCitasPage() {
@@ -51,18 +49,12 @@ export default async function MisCitasPage() {
     .order('stamps', { ascending: false });
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1">
-        <DashboardClient
-          userName={userData?.nombre || 'Usuario'}
-          upcoming={upcoming ?? []}
-          history={history ?? []}
-          favorites={(favorites ?? []).map((f: any) => f.car_washes).filter(Boolean)}
-          loyaltyCards={loyaltyCards ?? []}
-        />
-      </main>
-      <Footer />
-    </div>
+    <DashboardClient
+      userName={userData?.nombre || 'Usuario'}
+      upcoming={upcoming ?? []}
+      history={history ?? []}
+      favorites={(favorites ?? []).map((f: any) => f.car_washes).filter(Boolean)}
+      loyaltyCards={loyaltyCards ?? []}
+    />
   );
 }

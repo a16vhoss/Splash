@@ -15,7 +15,7 @@ interface SuccessScreenProps {
 
 export function SuccessScreen({
   carWashName,
-  carWashSlug,
+  carWashSlug: _carWashSlug,
   serviceName,
   fecha,
   hora,
