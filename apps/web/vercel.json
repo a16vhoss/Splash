@@ -1,6 +1,7 @@
 {
   "crons": [
     { "path": "/api/cron/reminders", "schedule": "*/30 * * * *" },
-    { "path": "/api/cron/review-requests", "schedule": "0 * * * *" }
+    { "path": "/api/cron/review-requests", "schedule": "0 * * * *" },
+    { "path": "/api/cron/expire-appointments", "schedule": "*/30 * * * *" }
   ]
 }

@@ -13,7 +13,7 @@ const statusLabels: Record<string, string> = {
   in_progress: 'En progreso',
   completed: 'Completada',
   cancelled: 'Cancelada',
-  no_show: 'No show',
+  no_show: 'Vencida',
 };
 
 export function StatusBadge({ status }: { status: string }) {
