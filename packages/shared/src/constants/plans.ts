@@ -5,7 +5,6 @@ export const SUBSCRIPTION_PLANS = [
 ] as const;
 
 export const TRIAL_DAYS = 14;
-export const SLOT_DURATION_MIN = 30;
 export const CANCELLATION_HOURS_LIMIT = 2;
 export const REMINDER_HOURS_BEFORE = 2;
 export const REVIEW_REQUEST_HOURS_AFTER = 1;
