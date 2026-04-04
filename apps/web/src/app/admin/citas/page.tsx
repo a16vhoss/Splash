@@ -6,6 +6,7 @@ import { getAdminCarWash } from '@/lib/admin-car-wash';
 import { StatusBadge } from '@/components/status-badge';
 import { cn } from '@/lib/utils';
 import { completeAppointment, markAsPaid } from './actions';
+import { AdminNewAppointment } from './admin-new-appointment';
 
 const FILTER_TABS = [
   { label: 'Todas', estado: undefined },
@@ -26,11 +27,22 @@ export default async function CitasPage({
   const carWash = await getAdminCarWash('id') as any;
 
   let appointments: any[] = [];
+  let services: { id: string; nombre: string }[] = [];
 
   if (carWash) {
+    // Query services for the new appointment form
+    const { data: servicesData } = await supabase
+      .from('services')
+      .select('id, nombre')
+      .eq('car_wash_id', carWash.id)
+      .eq('activo', true)
+      .eq('es_complementario', false)
+      .order('nombre');
+    services = servicesData ?? [];
+
     let query = supabase
       .from('appointments')
-      .select('id, fecha, hora_inicio, estado, precio_cobrado, estacion, metodo_pago, estado_pago, users!client_id(nombre), services!service_id(nombre)')
+      .select('id, fecha, hora_inicio, estado, precio_cobrado, estacion, metodo_pago, estado_pago, notas_cliente, users!client_id(nombre), services!service_id(nombre)')
       .eq('car_wash_id', carWash.id)
       .order('fecha', { ascending: false })
       .limit(50);
@@ -45,9 +57,14 @@ export default async function CitasPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">Citas</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Gestion de citas de tu autolavado</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Citas</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Gestion de citas de tu autolavado</p>
+        </div>
+        {carWash && services.length > 0 && (
+          <AdminNewAppointment carWashId={carWash.id} services={services} />
+        )}
       </div>
 
       {/* Filter tabs */}
@@ -100,7 +117,13 @@ export default async function CitasPage({
                       {apt.hora_inicio?.slice(0, 5)}
                     </td>
                     <td className="px-6 py-3 font-medium text-foreground">
-                      {apt.users?.nombre ?? '—'}
+                      {apt.users?.nombre
+                        ? apt.users.nombre
+                        : apt.notas_cliente?.startsWith('Walk-in:')
+                          ? apt.notas_cliente.slice('Walk-in:'.length).trim()
+                          : apt.notas_cliente === 'Walk-in'
+                            ? 'Walk-in'
+                            : '—'}
                     </td>
                     <td className="px-6 py-3 text-muted-foreground">
                       {apt.services?.nombre ?? '—'}
