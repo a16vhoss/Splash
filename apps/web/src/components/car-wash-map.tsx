@@ -11,6 +11,7 @@ interface CarWashMarker {
   latitud: number;
   longitud: number;
   rating_promedio: number;
+  direccion?: string | null;
 }
 
 interface CarWashMapProps {
@@ -77,7 +78,16 @@ export function CarWashMap({ carWashes, userLocation, onMarkerClick }: CarWashMa
 
     carWashes.forEach((cw) => {
       const marker = L.marker([cw.latitud, cw.longitud], { icon: carWashIcon }).addTo(map);
-      marker.bindPopup(`<strong>${cw.nombre}</strong>`);
+
+      const rating = cw.rating_promedio > 0 ? cw.rating_promedio.toFixed(1) : '—';
+      const addr = cw.direccion ? `<div style="color:#64748b;font-size:11px;margin-top:2px;">${cw.direccion}</div>` : '';
+      marker.bindTooltip(
+        `<div style="font-size:13px;font-weight:600;">${cw.nombre}</div>
+         <div style="font-size:11px;color:#f59e0b;margin-top:2px;">★ ${rating}</div>
+         ${addr}`,
+        { direction: 'top', offset: [0, -36], opacity: 1 }
+      );
+
       if (onMarkerClick) {
         marker.on('click', () => onMarkerClick(cw.slug));
       }

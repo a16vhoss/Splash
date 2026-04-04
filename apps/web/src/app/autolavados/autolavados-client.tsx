@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CarWashMap } from '@/components/car-wash-map';
 
 interface CarWash {
@@ -14,6 +15,7 @@ interface CarWash {
 }
 
 export function AutolavadosMap({ carWashes }: { carWashes: CarWash[] }) {
+  const router = useRouter();
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
 
@@ -33,8 +35,7 @@ export function AutolavadosMap({ carWashes }: { carWashes: CarWash[] }) {
   const mappable = carWashes.filter((cw) => cw.latitud != null && cw.longitud != null) as Array<CarWash & { latitud: number; longitud: number }>;
 
   function handleMarkerClick(slug: string) {
-    const el = document.getElementById(`wash-${slug}`);
-    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    router.push(`/autolavados/${slug}`);
   }
 
   if (mappable.length === 0) return null;
