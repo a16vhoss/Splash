@@ -55,7 +55,6 @@ export async function POST(request: NextRequest) {
 
   // Fetch complementary services if provided
   let complementaryServices: any[] = [];
-  let totalDuration = service.duracion_min;
   let totalPrice = service.precio;
 
   if ((parsed.data as any).servicios_complementarios?.length) {
@@ -69,19 +68,14 @@ export async function POST(request: NextRequest) {
 
     if (compServices) {
       complementaryServices = compServices;
-      totalDuration += compServices.reduce((sum: number, s: any) => sum + s.duracion_min, 0);
       totalPrice += compServices.reduce((sum: number, s: any) => sum + s.precio, 0);
     }
   }
 
-  // 4. Calculate hora_fin
-  const startMinutes = timeToMinutes(hora_inicio);
-  const hora_fin = minutesToTime(startMinutes + totalDuration);
-
-  // 5. Get car wash
+  // 4. Get car wash (includes slot_duration_min)
   const { data: carWash, error: carWashError } = await supabase
     .from('car_washes')
-    .select('nombre, direccion, num_estaciones, activo, verificado, subscription_status, owner_id, stripe_account_id, stripe_onboarding_complete')
+    .select('nombre, direccion, slot_duration_min, activo, verificado, subscription_status, owner_id')
     .eq('id', car_wash_id)
     .single();
 
@@ -89,17 +83,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Car wash no encontrado' }, { status: 404 });
   }
 
-  // Validate online payment capability
-  if ((parsed.data as any).metodo_pago === 'pago_en_linea') {
-    if (!carWash.stripe_account_id || !carWash.stripe_onboarding_complete) {
-      return NextResponse.json(
-        { error: 'Este autolavado no acepta pagos en linea' },
-        { status: 400 }
-      );
-    }
-  }
-
-  // 6. Validate car wash availability
+  // 5. Validate car wash availability
   if (!carWash.activo || !carWash.verificado) {
     return NextResponse.json({ error: 'Car wash no disponible' }, { status: 422 });
   }
@@ -109,36 +93,53 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Car wash no disponible' }, { status: 422 });
   }
 
-  // 7. Find available station
-  const { data: busyAppointments, error: busyError } = await supabase
-    .from('appointments')
-    .select('estacion')
-    .eq('car_wash_id', car_wash_id)
-    .eq('fecha', fecha)
-    .not('estado', 'in', '("cancelled","no_show")')
-    .lt('hora_inicio', hora_fin)
-    .gt('hora_fin', hora_inicio);
+  // 6. Calculate hora_fin using slot_duration_min
+  const slotDuration = carWash.slot_duration_min ?? 30;
+  const startMinutes = timeToMinutes(hora_inicio);
+  const hora_fin = minutesToTime(startMinutes + slotDuration);
 
-  if (busyError) {
+  // 7. Check slot capacity
+  // dia_semana: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const fechaDate = new Date(fecha + 'T00:00:00');
+  const diaSemana = fechaDate.getDay();
+
+  const { data: slotCapacity, error: slotError } = await supabase
+    .from('slot_capacities')
+    .select('capacidad')
+    .eq('car_wash_id', car_wash_id)
+    .eq('dia_semana', diaSemana)
+    .eq('hora', hora_inicio + ':00')
+    .maybeSingle();
+
+  if (slotError) {
     return NextResponse.json({ error: 'Error al verificar disponibilidad' }, { status: 500 });
   }
 
-  const busyStations = new Set((busyAppointments ?? []).map((a) => a.estacion));
-
-  let estacion: number | null = null;
-  for (let i = 1; i <= carWash.num_estaciones; i++) {
-    if (!busyStations.has(i)) {
-      estacion = i;
-      break;
-    }
+  // If no slot_capacity row exists, slot is unavailable
+  if (!slotCapacity) {
+    return NextResponse.json({ error: 'Horario no disponible' }, { status: 409 });
   }
 
-  // 8. No station available
-  if (estacion === null) {
+  const capacidad = slotCapacity.capacidad;
+
+  // Count existing non-cancelled appointments at this exact hora_inicio
+  const { count, error: countError } = await supabase
+    .from('appointments')
+    .select('id', { count: 'exact', head: true })
+    .eq('car_wash_id', car_wash_id)
+    .eq('fecha', fecha)
+    .eq('hora_inicio', hora_inicio)
+    .not('estado', 'in', '("cancelled","no_show")');
+
+  if (countError) {
+    return NextResponse.json({ error: 'Error al verificar disponibilidad' }, { status: 500 });
+  }
+
+  if ((count ?? 0) >= capacidad) {
     return NextResponse.json({ error: 'Horario ya no disponible' }, { status: 409 });
   }
 
-  // 9. Insert appointment
+  // 8. Insert appointment (no estacion field)
   const { data: appointment, error: insertError } = await supabase
     .from('appointments')
     .insert({
@@ -148,7 +149,6 @@ export async function POST(request: NextRequest) {
       fecha,
       hora_inicio,
       hora_fin,
-      estacion,
       precio_cobrado: totalPrice,
       precio_total: totalPrice,
       servicios_complementarios: complementaryServices.length > 0
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: insertError?.message ?? 'Error al crear cita' }, { status: 500 });
   }
 
-  // 10. Create notifications for client and car wash owner
+  // 9. Create notifications for client and car wash owner
   const notifications = [
     {
       user_id: user.id,
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
       appointment_id: appointment.id,
       tipo: NotifType.CONFIRMATION,
       titulo: 'Nueva cita',
-      mensaje: `Nueva cita el ${fecha} a las ${hora_inicio} en estación ${estacion}.`,
+      mensaje: `Nueva cita el ${fecha} a las ${hora_inicio}.`,
       leida: false,
     },
   ];
@@ -223,6 +223,6 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // 11. Return 201
+  // 10. Return 201
   return NextResponse.json({ appointment }, { status: 201 });
 }
