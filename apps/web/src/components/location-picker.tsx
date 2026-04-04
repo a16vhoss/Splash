@@ -8,11 +8,34 @@ interface LocationPickerProps {
   defaultLat: number | null;
   defaultLng: number | null;
   height?: string;
+  onAddressResolved?: (address: string) => void;
 }
 
 const DEFAULT_CENTER: [number, number] = [20.6597, -103.3496];
 
-export function LocationPicker({ defaultLat, defaultLng, height = '300px' }: LocationPickerProps) {
+async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+      { headers: { 'Accept-Language': 'es' } }
+    );
+    const data = await res.json();
+    if (!data.address) return null;
+    const a = data.address;
+    const parts = [
+      a.road,
+      a.house_number,
+      a.neighbourhood || a.suburb,
+      a.city || a.town || a.village,
+      a.state,
+    ].filter(Boolean);
+    return parts.join(', ');
+  } catch {
+    return null;
+  }
+}
+
+export function LocationPicker({ defaultLat, defaultLng, height = '300px', onAddressResolved }: LocationPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -48,6 +71,13 @@ export function LocationPicker({ defaultLat, defaultLng, height = '300px' }: Loc
     }
     setLat(position[0]);
     setLng(position[1]);
+
+    // Reverse geocode to get address
+    if (onAddressResolved) {
+      reverseGeocode(position[0], position[1]).then((address) => {
+        if (address) onAddressResolved(address);
+      });
+    }
   }
 
   const buildMap = useCallback(() => {
@@ -75,7 +105,14 @@ export function LocationPicker({ defaultLat, defaultLng, height = '300px' }: Loc
 
     // Place initial marker if we have coordinates
     if (defaultLat && defaultLng) {
-      placeMarker(map, [defaultLat, defaultLng]);
+      // Place without reverse geocoding for existing coords
+      if (markerRef.current) {
+        markerRef.current.setLatLng([defaultLat, defaultLng]);
+      } else {
+        markerRef.current = L.marker([defaultLat, defaultLng], { icon: pinIcon }).addTo(map);
+      }
+      setLat(defaultLat);
+      setLng(defaultLng);
     }
 
     // Click to place pin

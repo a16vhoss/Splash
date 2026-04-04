@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LocationPicker } from './location-picker';
 
 interface NewBusinessModalProps {
@@ -11,6 +11,7 @@ interface NewBusinessModalProps {
 export function NewBusinessModal({ onClose, onCreated }: NewBusinessModalProps) {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const direccionRef = useRef<HTMLInputElement>(null);
 
   // Prevent background scroll
   useEffect(() => {
@@ -95,6 +96,7 @@ export function NewBusinessModal({ onClose, onCreated }: NewBusinessModalProps) 
           <div>
             <label className="mb-1.5 block text-sm font-semibold text-foreground">Direccion</label>
             <input
+              ref={direccionRef}
               name="direccion"
               required
               placeholder="Calle, numero, colonia, ciudad"
@@ -115,7 +117,16 @@ export function NewBusinessModal({ onClose, onCreated }: NewBusinessModalProps) 
 
           <div>
             <label className="mb-1.5 block text-sm font-semibold text-foreground">Ubicacion</label>
-            <LocationPicker defaultLat={null} defaultLng={null} height="200px" />
+            <LocationPicker
+              defaultLat={null}
+              defaultLng={null}
+              height="200px"
+              onAddressResolved={(address) => {
+                if (direccionRef.current) {
+                  direccionRef.current.value = address;
+                }
+              }}
+            />
           </div>
 
           {error && (
