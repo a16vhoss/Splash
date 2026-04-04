@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     .insert({
       car_wash_id,
       service_id,
-      client_id: null,
+      client_id: user.id,
       fecha,
       hora_inicio,
       hora_fin,
