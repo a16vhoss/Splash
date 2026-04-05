@@ -94,10 +94,12 @@ export async function GET(request: NextRequest) {
   const openMinutes = timeToMinutes(businessHours.hora_apertura);
   const closeMinutes = timeToMinutes(businessHours.hora_cierre);
 
+  const numEstaciones = carWash.num_estaciones ?? 1;
   const slots = [];
   for (let start = openMinutes; start + slot_duration_min <= closeMinutes; start += slot_duration_min) {
     const time = minutesToTime(start);
-    const capacidad = capacityMap.get(time) ?? (carWash.num_estaciones ?? 1);
+    const rawCapacidad = capacityMap.get(time) ?? numEstaciones;
+    const capacidad = Math.min(rawCapacidad, numEstaciones);
     const ocupados = ocupadosMap.get(time) ?? 0;
     const disponibles = Math.max(0, capacidad - ocupados);
 

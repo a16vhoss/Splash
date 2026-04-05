@@ -266,7 +266,7 @@ export default async function CarWashProfilePage({
                 {carWash.latitud && carWash.longitud && (
                   <div className="rounded-modal overflow-hidden border border-border h-64">
                     <iframe
-                      src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&q=${carWash.latitud},${carWash.longitud}&zoom=15`}
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(carWash.longitud) - 0.01},${Number(carWash.latitud) - 0.005},${Number(carWash.longitud) + 0.01},${Number(carWash.latitud) + 0.005}&layer=mapnik&marker=${carWash.latitud},${carWash.longitud}`}
                       className="w-full h-full border-0"
                       allowFullScreen
                       loading="lazy"
