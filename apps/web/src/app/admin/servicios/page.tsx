@@ -6,14 +6,16 @@ import { HoursForm } from './hours-form';
 import { ServiceForm } from './service-form';
 import { ServiceTable } from './service-table';
 import { StationManager } from './station-manager';
+import { SlotConfig } from '@/components/slot-config';
 
 export default async function ServiciosPage() {
   const supabase = await createServerSupabase();
 
-  const carWash = await getAdminCarWash('id, num_estaciones') as any;
+  const carWash = await getAdminCarWash('id, num_estaciones, slot_duration_min') as any;
 
   let services: any[] = [];
   let businessHours: any[] = [];
+  let slotCapacities: any[] = [];
 
   if (carWash) {
     const { data: svcs } = await supabase
@@ -28,6 +30,12 @@ export default async function ServiciosPage() {
       .select('dia_semana, hora_apertura, hora_cierre, cerrado')
       .eq('car_wash_id', carWash.id) as { data: any[] | null };
     businessHours = bh ?? [];
+
+    const { data: sc } = await supabase
+      .from('slot_capacities')
+      .select('dia_semana, hora, capacidad')
+      .eq('car_wash_id', carWash.id) as { data: any[] | null };
+    slotCapacities = sc ?? [];
   }
 
   const hoursByDay = Object.fromEntries(businessHours.map((bh: any) => [bh.dia_semana, bh]));
@@ -67,6 +75,18 @@ export default async function ServiciosPage() {
         <h3 className="text-base font-semibold text-foreground">Estaciones de lavado</h3>
         <StationManager initialCount={numEstaciones} />
       </section>
+
+      {/* ── Capacidad por turno ── */}
+      {carWash && businessHours.length > 0 && (
+        <section className="space-y-4">
+          <SlotConfig
+            carWashId={carWash.id}
+            slotDurationMin={carWash.slot_duration_min ?? 60}
+            businessHours={businessHours}
+            initialCapacities={slotCapacities}
+          />
+        </section>
+      )}
     </div>
   );
 }
