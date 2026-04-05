@@ -139,28 +139,43 @@ export async function POST(request: NextRequest) {
   }
 
   // 8. Insert appointment (no estacion field)
-  const { data: appointment, error: insertError } = await supabase
+  const insertData: Record<string, any> = {
+    car_wash_id,
+    service_id,
+    client_id: user.id,
+    fecha,
+    hora_inicio,
+    hora_fin,
+    precio_cobrado: totalPrice,
+    precio_total: totalPrice,
+    servicios_complementarios: complementaryServices.length > 0
+      ? complementaryServices.map((s: any) => ({ id: s.id, nombre: s.nombre, precio: s.precio, duracion_min: s.duracion_min }))
+      : null,
+    estado: 'confirmed',
+    metodo_pago: (parsed.data as any).metodo_pago ?? null,
+    estado_pago: 'pendiente',
+    notas_cliente: notas_cliente ?? null,
+  };
+
+  if (recordatorio_dias != null) {
+    insertData.recordatorio_dias = recordatorio_dias;
+  }
+
+  let { data: appointment, error: insertError } = await supabase
     .from('appointments')
-    .insert({
-      car_wash_id,
-      service_id,
-      client_id: user.id,
-      fecha,
-      hora_inicio,
-      hora_fin,
-      precio_cobrado: totalPrice,
-      precio_total: totalPrice,
-      servicios_complementarios: complementaryServices.length > 0
-        ? complementaryServices.map((s: any) => ({ id: s.id, nombre: s.nombre, precio: s.precio, duracion_min: s.duracion_min }))
-        : null,
-      estado: 'confirmed',
-      metodo_pago: (parsed.data as any).metodo_pago ?? null,
-      estado_pago: 'pendiente',
-      notas_cliente: notas_cliente ?? null,
-      recordatorio_dias: recordatorio_dias ?? null,
-    })
+    .insert(insertData)
     .select()
     .single();
+
+  // Retry without recordatorio_dias if column doesn't exist yet
+  if (insertError?.message?.includes('recordatorio_dias')) {
+    delete insertData.recordatorio_dias;
+    ({ data: appointment, error: insertError } = await supabase
+      .from('appointments')
+      .insert(insertData)
+      .select()
+      .single());
+  }
 
   if (insertError || !appointment) {
     console.error('Insert appointment error:', insertError);
