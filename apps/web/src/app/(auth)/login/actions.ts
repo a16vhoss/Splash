@@ -65,6 +65,23 @@ export async function registerAction(formData: FormData) {
   redirect('/admin/dashboard');
 }
 
+export async function forgotPasswordAction(formData: FormData) {
+  const supabase = await createServerSupabase();
+  const email = formData.get('email') as string;
+
+  if (!email) return { error: 'Email requerido' };
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${appUrl}/reset-password`,
+  });
+
+  if (error) return { error: 'Error al enviar el correo. Intenta de nuevo.' };
+
+  return { success: 'Te enviamos un enlace a tu correo. Revisa tu bandeja de entrada.' };
+}
+
 export async function registerClientAction(formData: FormData) {
   const supabase = await createServerSupabase();
 
