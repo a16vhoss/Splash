@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
   // 4. Get car wash (includes slot_duration_min)
   const { data: carWash, error: carWashError } = await supabase
     .from('car_washes')
-    .select('nombre, direccion, slot_duration_min, activo, verificado, subscription_status, owner_id')
+    .select('nombre, direccion, slot_duration_min, num_estaciones, activo, subscription_status, owner_id')
     .eq('id', car_wash_id)
     .single();
 
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
   }
 
   // 5. Validate car wash availability
-  if (!carWash.activo || !carWash.verificado) {
+  if (!carWash.activo) {
     return NextResponse.json({ error: 'Car wash no disponible' }, { status: 422 });
   }
 
@@ -115,12 +115,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Error al verificar disponibilidad' }, { status: 500 });
   }
 
-  // If no slot_capacity row exists, slot is unavailable
-  if (!slotCapacity) {
-    return NextResponse.json({ error: 'Horario no disponible' }, { status: 409 });
-  }
-
-  const capacidad = slotCapacity.capacidad;
+  // If no slot_capacity row exists, use num_estaciones as default
+  const capacidad = slotCapacity
+    ? Math.min(slotCapacity.capacidad, carWash.num_estaciones ?? 1)
+    : (carWash.num_estaciones ?? 1);
 
   // Count existing non-cancelled appointments at this exact hora_inicio
   const { count, error: countError } = await supabase
