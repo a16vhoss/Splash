@@ -51,6 +51,26 @@ export async function toggleService(serviceId: string, activo: boolean) {
   revalidatePath('/admin/servicios');
 }
 
+export async function updateEstaciones(numEstaciones: number) {
+  const supabase = await createServerSupabase();
+
+  const carWash = await getAdminCarWash('id');
+  if (!carWash) throw new Error('No se encontro el autolavado');
+
+  if (numEstaciones < 1 || numEstaciones > 50) {
+    throw new Error('El número de estaciones debe ser entre 1 y 50');
+  }
+
+  const { error } = await supabase
+    .from('car_washes')
+    .update({ num_estaciones: numEstaciones })
+    .eq('id', carWash.id);
+
+  if (error) throw new Error('Error al actualizar estaciones');
+
+  revalidatePath('/admin/servicios');
+}
+
 export async function saveBusinessHours(formData: FormData) {
   const supabase = await createServerSupabase();
 

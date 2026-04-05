@@ -5,6 +5,7 @@ import { getAdminCarWash } from '@/lib/admin-car-wash';
 import { HoursForm } from './hours-form';
 import { ServiceForm } from './service-form';
 import { ServiceTable } from './service-table';
+import { StationManager } from './station-manager';
 
 export default async function ServiciosPage() {
   const supabase = await createServerSupabase();
@@ -64,26 +65,7 @@ export default async function ServiciosPage() {
       {/* ── Estaciones de lavado ── */}
       <section className="space-y-4">
         <h3 className="text-base font-semibold text-foreground">Estaciones de lavado</h3>
-        <div className="rounded-card bg-card p-6 shadow-card">
-          <p className="mb-4 text-sm text-muted-foreground">
-            Total de estaciones:{' '}
-            <span className="font-semibold text-foreground">{numEstaciones}</span>
-          </p>
-          {numEstaciones > 0 ? (
-            <div className="flex flex-wrap gap-3">
-              {Array.from({ length: numEstaciones }, (_, i) => (
-                <div
-                  key={i}
-                  className="flex h-16 w-16 flex-col items-center justify-center rounded-card border-2 border-primary bg-primary/5"
-                >
-                  <span className="text-xs font-bold text-primary">E{i + 1}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No hay estaciones configuradas</p>
-          )}
-        </div>
+        <StationManager initialCount={numEstaciones} />
       </section>
     </div>
   );
