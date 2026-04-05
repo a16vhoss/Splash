@@ -56,6 +56,11 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
 
   const role = userRecord?.role as string | undefined;
 
+  // Allow authenticated users on /reset-password (they just came from the callback)
+  if (pathname === '/reset-password') {
+    return response;
+  }
+
   // Logged-in user on /login: redirect based on role
   if (pathname === '/login') {
     const url = request.nextUrl.clone();
