@@ -41,6 +41,14 @@ export default async function ServiciosPage() {
   const hoursByDay = Object.fromEntries(businessHours.map((bh: any) => [bh.dia_semana, bh]));
   const numEstaciones = carWash?.num_estaciones ?? 0;
 
+  // Default business hours (matching HoursForm defaults) when none are saved yet
+  const defaultBusinessHours = Array.from({ length: 7 }, (_, i) => ({
+    dia_semana: i,
+    hora_apertura: '09:00',
+    hora_cierre: '18:00',
+    cerrado: false,
+  }));
+
   return (
     <div className="space-y-8">
       <div>
@@ -77,12 +85,12 @@ export default async function ServiciosPage() {
       </section>
 
       {/* ── Capacidad por turno ── */}
-      {carWash && businessHours.length > 0 && (
+      {carWash && (
         <section className="space-y-4">
           <SlotConfig
             carWashId={carWash.id}
             slotDurationMin={carWash.slot_duration_min ?? 60}
-            businessHours={businessHours}
+            businessHours={businessHours.length > 0 ? businessHours : defaultBusinessHours}
             initialCapacities={slotCapacities}
           />
         </section>
