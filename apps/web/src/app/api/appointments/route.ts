@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
   }
 
-  const { car_wash_id, service_id, fecha, hora_inicio, notas_cliente } = parsed.data;
+  const { car_wash_id, service_id, fecha, hora_inicio, notas_cliente, recordatorio_dias } = parsed.data;
 
   // 3. Get service
   const { data: service, error: serviceError } = await supabase
@@ -157,6 +157,7 @@ export async function POST(request: NextRequest) {
       metodo_pago: (parsed.data as any).metodo_pago ?? null,
       estado_pago: 'pendiente',
       notas_cliente: notas_cliente ?? null,
+      recordatorio_dias: recordatorio_dias ?? null,
     })
     .select()
     .single();

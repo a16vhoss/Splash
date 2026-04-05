@@ -8,6 +8,7 @@ export const createAppointmentSchema = z.object({
   notas_cliente: z.string().max(500).optional(),
   servicios_complementarios: z.array(z.string().uuid()).optional(),
   metodo_pago: z.enum(['efectivo', 'tarjeta_sitio', 'transferencia']).optional(),
+  recordatorio_dias: z.number().int().min(0).max(7).optional(),
 });
 
 export const cancelAppointmentSchema = z.object({

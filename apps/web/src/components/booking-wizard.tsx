@@ -337,6 +337,8 @@ function StepConfirm({
   availableMethods,
   paymentMethod,
   onChangePayment,
+  recordatorioDias,
+  onChangeRecordatorio,
   onConfirm,
   loading,
   error,
@@ -348,6 +350,8 @@ function StepConfirm({
   availableMethods: string[];
   paymentMethod: string;
   onChangePayment: (m: string) => void;
+  recordatorioDias: number;
+  onChangeRecordatorio: (d: number) => void;
   onConfirm: () => void;
   loading: boolean;
   error: string | null;
@@ -419,6 +423,34 @@ function StepConfirm({
         </div>
       )}
 
+      {/* Reminder */}
+      <div className="mb-6">
+        <h3 className="text-base font-semibold text-foreground mb-3">Recordatorio</h3>
+        <div className="space-y-2">
+          {[
+            { value: 0, label: 'No recordar' },
+            { value: 1, label: '1 día antes' },
+            { value: 2, label: '2 días antes' },
+            { value: 3, label: '3 días antes' },
+          ].map((opt) => (
+            <label
+              key={opt.value}
+              className="flex items-center gap-3 rounded-card border border-border p-3 cursor-pointer hover:bg-muted/30 transition-colors"
+            >
+              <input
+                type="radio"
+                name="recordatorio"
+                value={opt.value}
+                checked={recordatorioDias === opt.value}
+                onChange={() => onChangeRecordatorio(opt.value)}
+                className="h-4 w-4 border-border text-primary focus:ring-ring"
+              />
+              <span className="text-sm font-medium text-foreground">{opt.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       {error && (
         <div className="mb-4 rounded-card bg-red-50 border border-red-200 px-4 py-3">
           <p className="text-sm text-destructive">{error}</p>
@@ -459,6 +491,7 @@ export function BookingWizard({ carWashId, initialServiceId }: BookingWizardProp
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
+  const [recordatorioDias, setRecordatorioDias] = useState<number>(1);
 
   // Confirm state
   const [booking, setBooking] = useState(false);
@@ -549,6 +582,7 @@ export function BookingWizard({ carWashId, initialServiceId }: BookingWizardProp
         hora_inicio: selectedTime,
         servicios_complementarios: selectedExtras.length > 0 ? selectedExtras : undefined,
         metodo_pago: paymentMethod || undefined,
+        recordatorio_dias: recordatorioDias,
       }),
     });
 
@@ -625,6 +659,8 @@ export function BookingWizard({ carWashId, initialServiceId }: BookingWizardProp
           availableMethods={availableMethods}
           paymentMethod={paymentMethod}
           onChangePayment={setPaymentMethod}
+          recordatorioDias={recordatorioDias}
+          onChangeRecordatorio={setRecordatorioDias}
           onConfirm={handleConfirm}
           loading={booking}
           error={bookingError}
