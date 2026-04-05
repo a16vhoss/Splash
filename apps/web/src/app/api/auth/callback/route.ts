@@ -4,10 +4,12 @@ import { createServerClient } from '@supabase/ssr';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') || '/';
+  const next = searchParams.get('next') || '/reset-password';
+
+  const redirectUrl = new URL(next, request.url);
 
   if (code) {
-    const response = NextResponse.redirect(new URL(next, request.url));
+    const response = NextResponse.redirect(redirectUrl);
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,6 +35,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // If no code or error, redirect to login with error
   return NextResponse.redirect(new URL('/login', request.url));
 }
