@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { createAppointmentSchema, NotifType, SubStatus } from '@splash/shared';
 import { sendBookingConfirmationClient, sendBookingConfirmationAdmin } from '@/lib/email';
+import { insertNotifications } from '@/lib/notifications';
 
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
@@ -165,15 +166,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: insertError?.message ?? 'Error al crear cita' }, { status: 500 });
   }
 
-  // 9. Create notifications for client and car wash owner
-  const notifications = [
+  // 9. Create notifications for client and car wash owner (uses service role to bypass RLS)
+  await insertNotifications([
     {
       user_id: user.id,
       appointment_id: appointment.id,
       tipo: NotifType.CONFIRMATION,
       titulo: 'Cita confirmada',
       mensaje: `Tu cita para el ${fecha} a las ${hora_inicio} ha sido confirmada.`,
-      leida: false,
     },
     {
       user_id: carWash.owner_id,
@@ -181,11 +181,8 @@ export async function POST(request: NextRequest) {
       tipo: NotifType.CONFIRMATION,
       titulo: 'Nueva cita',
       mensaje: `Nueva cita el ${fecha} a las ${hora_inicio}.`,
-      leida: false,
     },
-  ];
-
-  await supabase.from('notifications').insert(notifications);
+  ]);
 
   // Send confirmation emails (fire-and-forget)
   const { data: clientUser } = await supabase

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { getAdminCarWash } from '@/lib/admin-car-wash';
+import { insertNotifications } from '@/lib/notifications';
 
 export async function completeAppointment(appointmentId: string) {
   const supabase = await createServerSupabase();
@@ -27,27 +28,23 @@ export async function completeAppointment(appointmentId: string) {
     .update({ estado: 'completed' })
     .eq('id', appointmentId);
 
-  // Create notifications for both client and admin
-  const notifications = [
+  // Create notifications for both client and admin (uses service role to bypass RLS)
+  await insertNotifications([
     {
       user_id: appointment.client_id,
       appointment_id: appointmentId,
-      tipo: 'confirmation' as const,
+      tipo: 'confirmation',
       titulo: 'Cita completada',
       mensaje: `Tu cita del ${appointment.fecha} a las ${appointment.hora_inicio?.slice(0, 5)} en ${carWash.nombre} ha sido completada.`,
-      leida: false,
     },
     {
       user_id: carWash.owner_id,
       appointment_id: appointmentId,
-      tipo: 'confirmation' as const,
+      tipo: 'confirmation',
       titulo: 'Cita completada',
       mensaje: `Cita del ${appointment.fecha} a las ${appointment.hora_inicio?.slice(0, 5)} marcada como completada.`,
-      leida: false,
     },
-  ];
-
-  await supabase.from('notifications').insert(notifications);
+  ]);
 
   revalidatePath('/admin/citas');
   revalidatePath('/admin/dashboard');

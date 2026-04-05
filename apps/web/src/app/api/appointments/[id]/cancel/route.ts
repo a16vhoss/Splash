@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { CANCELLATION_HOURS_LIMIT, NotifType } from '@splash/shared';
 import { sendCancellationEmail } from '@/lib/email';
+import { insertNotifications } from '@/lib/notifications';
 
 export async function POST(
   request: NextRequest,
@@ -101,7 +102,7 @@ export async function POST(
   const notifyUserId = isClient ? carWash?.owner_id : appointment.client_id;
 
   if (notifyUserId) {
-    await supabase.from('notifications').insert({
+    await insertNotifications([{
       user_id: notifyUserId,
       appointment_id: id,
       tipo: NotifType.CANCELLATION,
@@ -109,8 +110,7 @@ export async function POST(
       mensaje: isClient
         ? `El cliente canceló la cita del ${appointment.fecha} a las ${appointment.hora_inicio}.`
         : `Tu cita del ${appointment.fecha} a las ${appointment.hora_inicio} fue cancelada.`,
-      leida: false,
-    });
+    }]);
   }
 
   // Send cancellation emails (fire-and-forget)
