@@ -30,11 +30,6 @@ export function AvatarUpload({ userId, currentUrl, nombre, size = 80, onUploaded
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast('La imagen debe ser menor a 2MB', 'error');
-      return;
-    }
-
     setUploading(true);
 
     const ext = file.name.split('.').pop();
