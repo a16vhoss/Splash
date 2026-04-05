@@ -22,6 +22,7 @@ interface CapacityEntry {
 interface SlotConfigProps {
   carWashId: string;
   slotDurationMin: number;
+  numEstaciones: number;
   businessHours: BusinessHour[];
   initialCapacities: CapacityEntry[];
 }
@@ -60,7 +61,7 @@ function buildCapacityMap(capacities: CapacityEntry[]): CapacityMap {
   return map;
 }
 
-export function SlotConfig({ carWashId, slotDurationMin, businessHours, initialCapacities }: SlotConfigProps) {
+export function SlotConfig({ carWashId, slotDurationMin, numEstaciones, businessHours, initialCapacities }: SlotConfigProps) {
   const toast = useToast();
   const [duration, setDuration] = useState<number>(slotDurationMin);
   const [activeDay, setActiveDay] = useState<number>(() => {
@@ -83,7 +84,7 @@ export function SlotConfig({ carWashId, slotDurationMin, businessHours, initialC
   }
 
   function getCapacity(dia: number, hora: string): number {
-    return capacities[dia]?.[hora] ?? 1;
+    return capacities[dia]?.[hora] ?? numEstaciones;
   }
 
   function setCapacity(dia: number, hora: string, value: number) {
@@ -106,7 +107,7 @@ export function SlotConfig({ carWashId, slotDurationMin, businessHours, initialC
         const slots = generateSlots(bh.hora_apertura, bh.hora_cierre, newDuration);
         next[bh.dia_semana] = {};
         for (const slot of slots) {
-          next[bh.dia_semana][slot] = prev[bh.dia_semana]?.[slot] ?? 1;
+          next[bh.dia_semana][slot] = prev[bh.dia_semana]?.[slot] ?? numEstaciones;
         }
       }
       return next;
@@ -123,8 +124,8 @@ export function SlotConfig({ carWashId, slotDurationMin, businessHours, initialC
         const targetSlots = generateSlots(bh.hora_apertura, bh.hora_cierre, duration);
         next[bh.dia_semana] = {};
         for (const slot of targetSlots) {
-          // Use matching hour from source if available, else 1
-          next[bh.dia_semana][slot] = prev[activeDay]?.[slot] ?? 1;
+          // Use matching hour from source if available, else numEstaciones
+          next[bh.dia_semana][slot] = prev[activeDay]?.[slot] ?? numEstaciones;
         }
       }
       return next;
@@ -234,10 +235,10 @@ export function SlotConfig({ carWashId, slotDurationMin, businessHours, initialC
                   <td className="py-2">
                     <input
                       type="number"
-                      min={1}
-                      max={99}
+                      min={0}
+                      max={numEstaciones}
                       value={getCapacity(activeDay, hora)}
-                      onChange={(e) => setCapacity(activeDay, hora, Math.max(1, Number(e.target.value)))}
+                      onChange={(e) => setCapacity(activeDay, hora, Math.min(numEstaciones, Math.max(0, Number(e.target.value))))}
                       className="w-20 rounded-input border border-border bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </td>

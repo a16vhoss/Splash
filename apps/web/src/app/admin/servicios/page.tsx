@@ -90,6 +90,7 @@ export default async function ServiciosPage() {
           <SlotConfig
             carWashId={carWash.id}
             slotDurationMin={carWash.slot_duration_min ?? 60}
+            numEstaciones={numEstaciones}
             businessHours={businessHours.length > 0 ? businessHours : defaultBusinessHours}
             initialCapacities={slotCapacities}
           />

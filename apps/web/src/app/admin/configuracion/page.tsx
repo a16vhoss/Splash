@@ -7,7 +7,7 @@ import { SlotConfig } from '@/components/slot-config';
 import { DeleteAccount } from '@/components/delete-account';
 
 export default async function ConfiguracionPage() {
-  const carWash = await getAdminCarWash('id, metodos_pago, whatsapp, latitud, longitud, stripe_account_id, stripe_onboarding_complete, slot_duration_min') as any;
+  const carWash = await getAdminCarWash('id, num_estaciones, metodos_pago, whatsapp, latitud, longitud, stripe_account_id, stripe_onboarding_complete, slot_duration_min') as any;
 
   if (!carWash) return <p className="text-muted-foreground">No se encontro tu autolavado.</p>;
 
@@ -34,6 +34,7 @@ export default async function ConfiguracionPage() {
       <SlotConfig
         carWashId={carWash.id}
         slotDurationMin={carWash.slot_duration_min ?? 60}
+        numEstaciones={carWash.num_estaciones ?? 1}
         businessHours={businessHours ?? []}
         initialCapacities={slotCapacities ?? []}
       />
