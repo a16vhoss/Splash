@@ -4,6 +4,7 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { getAdminCarWash } from '@/lib/admin-car-wash';
 import { MetricCard } from '@/components/metric-card';
 import { StatusBadge } from '@/components/status-badge';
+import { completeAppointment } from '@/app/admin/citas/actions';
 
 export default async function DashboardPage() {
   const supabase = await createServerSupabase();
@@ -43,7 +44,7 @@ export default async function DashboardPage() {
 
     const { data: upcoming } = await supabase
       .from('appointments')
-      .select('id, fecha, hora_inicio, estado, precio_cobrado, estacion, users!client_id(nombre), services!service_id(nombre)')
+      .select('id, fecha, hora_inicio, estado, precio_cobrado, estacion, users!client_id(nombre, email), services!service_id(nombre)')
       .eq('car_wash_id', carWash.id)
       .gte('fecha', today)
       .order('fecha', { ascending: true })
@@ -105,7 +106,7 @@ export default async function DashboardPage() {
             {upcomingAppointments.map((apt: any) => (
               <div key={apt.id} className="px-4 py-3 space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-foreground text-sm">{apt.users?.nombre ?? '—'}</span>
+                  <span className="font-medium text-foreground text-sm">{apt.users?.nombre || apt.users?.email || '—'}</span>
                   <StatusBadge status={apt.estado} />
                 </div>
                 <p className="text-xs text-muted-foreground">{apt.services?.nombre ?? '—'}</p>
@@ -114,6 +115,11 @@ export default async function DashboardPage() {
                   <span>{apt.hora_inicio?.slice(0, 5)}</span>
                   <span>E{apt.estacion}</span>
                 </div>
+                {(apt.estado === 'confirmed' || apt.estado === 'in_progress') && (
+                  <form action={async () => { 'use server'; await completeAppointment(apt.id); const { revalidatePath } = await import('next/cache'); revalidatePath('/admin/dashboard'); }}>
+                    <button type="submit" className="mt-1 text-xs font-medium text-primary hover:underline">Completar</button>
+                  </form>
+                )}
               </div>
             ))}
           </div>
@@ -128,13 +134,14 @@ export default async function DashboardPage() {
                   <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Hora</th>
                   <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Estacion</th>
                   <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Estado</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-muted-foreground">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {upcomingAppointments.map((apt: any) => (
                   <tr key={apt.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                     <td className="px-6 py-3 font-medium text-foreground">
-                      {apt.users?.nombre ?? '—'}
+                      {apt.users?.nombre || apt.users?.email || '—'}
                     </td>
                     <td className="px-6 py-3 text-muted-foreground">
                       {apt.services?.nombre ?? '—'}
@@ -144,6 +151,15 @@ export default async function DashboardPage() {
                     <td className="px-6 py-3 text-muted-foreground">E{apt.estacion}</td>
                     <td className="px-6 py-3">
                       <StatusBadge status={apt.estado} />
+                    </td>
+                    <td className="px-6 py-3">
+                      {(apt.estado === 'confirmed' || apt.estado === 'in_progress') && (
+                        <form action={async () => { 'use server'; await completeAppointment(apt.id); const { revalidatePath } = await import('next/cache'); revalidatePath('/admin/dashboard'); }}>
+                          <button type="submit" className="rounded-input bg-accent px-3 py-1 text-xs font-semibold text-white hover:bg-accent/90">
+                            Completar
+                          </button>
+                        </form>
+                      )}
                     </td>
                   </tr>
                 ))}

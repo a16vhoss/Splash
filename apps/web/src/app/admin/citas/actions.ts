@@ -28,6 +28,7 @@ export async function completeAppointment(appointmentId: string) {
     .eq('id', appointmentId);
 
   revalidatePath('/admin/citas');
+  revalidatePath('/admin/dashboard');
 }
 
 export async function markAsPaid(appointmentId: string) {
