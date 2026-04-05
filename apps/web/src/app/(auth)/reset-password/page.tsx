@@ -15,8 +15,14 @@ export default function ResetPasswordPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Supabase sends recovery tokens in the URL hash fragment
-    // The client-side Supabase SDK automatically picks them up
+    // The auth callback already exchanged the code and set the session
+    // Check if we have a valid session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setReady(true);
+      }
+    });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
         setReady(true);
