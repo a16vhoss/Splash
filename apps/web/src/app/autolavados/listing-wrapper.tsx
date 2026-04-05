@@ -106,40 +106,11 @@ export function AutolavadosListing({ washes, query, activeRating, activeSort }: 
 
   return (
     <>
-      {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {RATING_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => toggleParam('rating', opt.value)}
-            className={`px-3 py-1.5 rounded-pill text-xs font-semibold border transition-colors ${
-              currentRating === opt.value
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-foreground border-border hover:border-primary/50'
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-
-        <select
-          value={sort}
-          onChange={(e) => handleSortChange(e.target.value)}
-          className="px-3 py-1.5 rounded-pill text-xs font-semibold border border-border bg-white text-foreground"
-        >
-          {SORT_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {/* Results info */}
       <p className="text-sm text-muted-foreground mb-4">
         {sortedWashes.length} autolavados encontrados
         {query ? ` para "${query}"` : ''}
-        {sort === 'nearest' && userLocation ? ' · Ordenados por distancia' : ''}
+        {userLocation ? ' · Más cercanos primero' : ''}
       </p>
 
       {sortedWashes.length > 0 ? (
