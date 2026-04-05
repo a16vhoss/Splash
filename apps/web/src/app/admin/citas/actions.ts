@@ -7,12 +7,12 @@ import { getAdminCarWash } from '@/lib/admin-car-wash';
 export async function completeAppointment(appointmentId: string) {
   const supabase = await createServerSupabase();
 
-  const carWash = await getAdminCarWash('id');
+  const carWash = await getAdminCarWash('id, nombre, owner_id');
   if (!carWash) throw new Error('No se encontro el autolavado');
 
   const { data: appointment } = await supabase
     .from('appointments')
-    .select('id, estado')
+    .select('id, estado, client_id, fecha, hora_inicio')
     .eq('id', appointmentId)
     .eq('car_wash_id', carWash.id)
     .single();
@@ -26,6 +26,28 @@ export async function completeAppointment(appointmentId: string) {
     .from('appointments')
     .update({ estado: 'completed' })
     .eq('id', appointmentId);
+
+  // Create notifications for both client and admin
+  const notifications = [
+    {
+      user_id: appointment.client_id,
+      appointment_id: appointmentId,
+      tipo: 'confirmation' as const,
+      titulo: 'Cita completada',
+      mensaje: `Tu cita del ${appointment.fecha} a las ${appointment.hora_inicio?.slice(0, 5)} en ${carWash.nombre} ha sido completada.`,
+      leida: false,
+    },
+    {
+      user_id: carWash.owner_id,
+      appointment_id: appointmentId,
+      tipo: 'confirmation' as const,
+      titulo: 'Cita completada',
+      mensaje: `Cita del ${appointment.fecha} a las ${appointment.hora_inicio?.slice(0, 5)} marcada como completada.`,
+      leida: false,
+    },
+  ];
+
+  await supabase.from('notifications').insert(notifications);
 
   revalidatePath('/admin/citas');
   revalidatePath('/admin/dashboard');
