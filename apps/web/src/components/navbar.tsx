@@ -19,10 +19,10 @@ export function Navbar() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setUser(user);
-        supabase.from('users').select('role, nombre').eq('id', user.id).single()
+        supabase.from('users').select('role, nombre, avatar_url').eq('id', user.id).single()
           .then(({ data }) => {
             setRole(data?.role ?? null);
-            setUser((prev: any) => ({ ...prev, nombre: data?.nombre }));
+            setUser((prev: any) => ({ ...prev, nombre: data?.nombre, avatar_url: data?.avatar_url }));
           });
       }
     });
@@ -63,9 +63,13 @@ export function Navbar() {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 rounded-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
               >
-                <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
-                  {(user.nombre ?? user.email)?.[0]?.toUpperCase() ?? '?'}
-                </div>
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover" />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
+                    {(user.nombre ?? user.email)?.[0]?.toUpperCase() ?? '?'}
+                  </div>
+                )}
                 <span className="max-w-[120px] truncate">{user.nombre ?? user.email}</span>
                 <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
               </button>

@@ -65,9 +65,10 @@ const navItems = [
 interface SidebarProps {
   businessName?: string;
   subscriptionStatus?: string;
+  avatarUrl?: string | null;
 }
 
-export function Sidebar({ businessName, subscriptionStatus }: SidebarProps) {
+export function Sidebar({ businessName, subscriptionStatus, avatarUrl }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -114,9 +115,13 @@ export function Sidebar({ businessName, subscriptionStatus }: SidebarProps) {
 
       {/* Footer */}
       <div className="flex items-center gap-3 px-4 py-4 border-t border-sidebar-muted">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-sidebar-accent text-white text-sm font-bold">
-          {initials}
-        </div>
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
+        ) : (
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-sidebar-accent text-white text-sm font-bold">
+            {initials}
+          </div>
+        )}
         <div className="flex flex-col min-w-0 flex-1">
           <span className="text-sm font-semibold truncate">{businessName ?? 'Mi Autolavado'}</span>
           <span className="text-xs text-slate-400">{subscriptionStatus ? `Plan ${subscriptionStatus}` : ''}</span>
