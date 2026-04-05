@@ -48,9 +48,6 @@ export function Navbar() {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-6">
-          <Link href="/" className={`text-sm font-semibold transition-colors ${isActive('/') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-            Inicio
-          </Link>
           <Link href="/autolavados" className={`text-sm font-semibold transition-colors ${isActive('/autolavados') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
             Autolavados
           </Link>
@@ -106,7 +103,7 @@ export function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-border bg-white px-4 py-4 space-y-3">
-          <Link href="/" className="block text-sm font-semibold text-foreground" onClick={() => setMenuOpen(false)}>Inicio</Link>
+          <Link href="/autolavados" className="block text-sm font-semibold text-foreground" onClick={() => setMenuOpen(false)}>Autolavados</Link>
           <Link href="/autolavados" className="block text-sm font-semibold text-foreground" onClick={() => setMenuOpen(false)}>Autolavados</Link>
           {user ? (
             <>
