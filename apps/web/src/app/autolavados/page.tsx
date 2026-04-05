@@ -43,8 +43,6 @@ export default async function AutolavadosPage({
         <AutolavadosListing
           washes={washes ?? []}
           query={params.q}
-          activeRating={params.rating}
-          activeSort={params.sort}
         />
       </main>
       <Footer />
