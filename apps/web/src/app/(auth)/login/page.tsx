@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { loginAction, registerAction, registerClientAction, forgotPasswordAction } from './actions';
+import { loginAction, registerAction, registerClientAction } from './actions';
+import { createClient } from '@/lib/supabase/client';
 
 type Screen = 'role-select' | 'login' | 'register-select' | 'register' | 'forgot-password';
 type Role = 'admin' | 'client';
@@ -61,12 +62,25 @@ export default function LoginPage() {
     setError(null);
     setSuccess(null);
     setLoading(true);
+
     const formData = new FormData(event.currentTarget);
-    const result = await forgotPasswordAction(formData);
-    if (result?.error) {
-      setError(result.error);
-    } else if (result?.success) {
-      setSuccess(result.success);
+    const email = formData.get('email') as string;
+
+    if (!email) {
+      setError('Email requerido');
+      setLoading(false);
+      return;
+    }
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) {
+      setError('Error al enviar el correo. Intenta de nuevo.');
+    } else {
+      setSuccess('Te enviamos un enlace a tu correo. Revisa tu bandeja de entrada.');
     }
     setLoading(false);
   }

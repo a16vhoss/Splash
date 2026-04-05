@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -12,25 +12,32 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
   const router = useRouter();
+
   const supabase = createClient();
 
-  useEffect(() => {
-    // The auth callback already exchanged the code and set the session
-    // Check if we have a valid session
+  const checkSession = useCallback(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setReady(true);
-      }
+      if (session) setReady(true);
     });
+  }, [supabase.auth]);
 
+  useEffect(() => {
+    // Listen for auth state changes (PASSWORD_RECOVERY event from URL tokens)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
         setReady(true);
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+    // Also check existing session after a short delay (for callback redirect flow)
+    checkSession();
+    const timer = setTimeout(checkSession, 1000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timer);
+    };
+  }, [supabase.auth, checkSession]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
