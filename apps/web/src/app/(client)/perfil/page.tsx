@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+import { DeleteAccount } from '@/components/delete-account';
 
 export default function PerfilPage() {
   const supabase = createClient();
@@ -69,10 +70,13 @@ export default function PerfilPage() {
       {/* Logout */}
       <button
         onClick={handleLogout}
-        className="w-full py-3 rounded-card bg-destructive text-white font-semibold uppercase tracking-wider text-sm hover:opacity-90 transition-opacity"
+        className="w-full py-3 mb-8 rounded-card bg-destructive text-white font-semibold uppercase tracking-wider text-sm hover:opacity-90 transition-opacity"
       >
         Cerrar sesion
       </button>
+
+      {/* Delete account */}
+      <DeleteAccount />
     </div>
   );
 }

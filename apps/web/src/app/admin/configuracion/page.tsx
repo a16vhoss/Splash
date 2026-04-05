@@ -4,6 +4,7 @@ import { getAdminCarWash } from '@/lib/admin-car-wash';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { ConfigForm } from './config-form';
 import { SlotConfig } from '@/components/slot-config';
+import { DeleteAccount } from '@/components/delete-account';
 
 export default async function ConfiguracionPage() {
   const carWash = await getAdminCarWash('id, metodos_pago, whatsapp, latitud, longitud, stripe_account_id, stripe_onboarding_complete, slot_duration_min') as any;
@@ -37,6 +38,7 @@ export default async function ConfiguracionPage() {
         initialCapacities={slotCapacities ?? []}
       />
       <ConfigForm carWash={carWash} />
+      <DeleteAccount isAdmin />
     </div>
   );
 }
