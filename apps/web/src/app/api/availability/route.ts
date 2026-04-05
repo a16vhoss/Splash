@@ -26,10 +26,10 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createServerSupabase();
 
-  // 1. Get slot_duration_min from car_washes
+  // 1. Get slot_duration_min and num_estaciones from car_washes
   const { data: carWash, error: carWashError } = await supabase
     .from('car_washes')
-    .select('slot_duration_min')
+    .select('slot_duration_min, num_estaciones')
     .eq('id', car_wash_id)
     .single();
 
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
   const slots = [];
   for (let start = openMinutes; start + slot_duration_min <= closeMinutes; start += slot_duration_min) {
     const time = minutesToTime(start);
-    const capacidad = capacityMap.get(time) ?? 0;
+    const capacidad = capacityMap.get(time) ?? (carWash.num_estaciones ?? 1);
     const ocupados = ocupadosMap.get(time) ?? 0;
     const disponibles = Math.max(0, capacidad - ocupados);
 
