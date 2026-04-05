@@ -15,14 +15,10 @@ export default function ResetPasswordPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    // The callback route already exchanged the code for a session
-    // Check if we have a valid session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setReady(true);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+    // Supabase sends recovery tokens in the URL hash fragment
+    // The client-side Supabase SDK automatically picks them up
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
         setReady(true);
       }
     });
@@ -84,6 +80,7 @@ export default function ResetPasswordPage() {
             </div>
           ) : !ready ? (
             <div className="text-center">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
               <h2 className="text-lg font-semibold text-slate-900 mb-2">Verificando enlace...</h2>
               <p className="text-sm text-slate-500">Si el enlace expiró, solicita uno nuevo desde el login.</p>
               <a href="/login" className="inline-block mt-4 text-sm text-primary font-semibold hover:underline">
