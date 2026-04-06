@@ -216,12 +216,16 @@ export function DashboardClient({ userName, upcoming, history, favorites, loyalt
                       {apt.estado === 'completed' && !hasReview && (
                         <Link
                           href={`/calificar/${apt.id}`}
-                          className="bg-warning/10 text-warning-foreground px-3 py-1.5 rounded-card text-xs font-semibold hover:bg-warning/20 transition-colors"
+                          className="bg-accent text-white px-3 py-1.5 rounded-card text-xs font-semibold hover:bg-accent/90 transition-colors"
                         >
                           Calificar
                         </Link>
                       )}
-                      {hasReview && <span className="text-xs text-muted-foreground px-2 py-1.5">Calificado</span>}
+                      {hasReview && (
+                        <span className="bg-accent/10 text-accent px-3 py-1.5 rounded-card text-xs font-semibold">
+                          Calificado
+                        </span>
+                      )}
                       <Link
                         href={`/agendar?car_wash_id=${apt.car_wash_id}&service_id=${apt.service_id}`}
                         className="bg-primary text-white px-3 py-1.5 rounded-card text-xs font-semibold hover:bg-primary/90 transition-colors"
