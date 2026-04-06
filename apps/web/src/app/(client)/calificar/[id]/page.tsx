@@ -42,19 +42,20 @@ export default function CalificarPage() {
     setSubmitting(true);
     setError(null);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setError('No autenticado'); return; }
-
-    const { error: insertError } = await supabase.from('reviews').insert({
-      appointment_id: id,
-      client_id: user.id,
-      car_wash_id: appointment.car_wash_id,
-      rating,
-      comentario: comentario || null,
+    const res = await fetch('/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        appointment_id: id,
+        car_wash_id: appointment.car_wash_id,
+        rating,
+        comentario: comentario || null,
+      }),
     });
 
-    if (insertError) {
-      setError(insertError.code === '23505' ? 'Ya calificaste este servicio' : insertError.message);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error ?? 'Error al enviar calificacion');
       setSubmitting(false);
       return;
     }
