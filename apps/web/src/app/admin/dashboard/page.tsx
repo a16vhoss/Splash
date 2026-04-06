@@ -37,7 +37,7 @@ export default async function DashboardPage() {
       .from('appointments')
       .select('precio_cobrado')
       .eq('car_wash_id', carWash.id)
-      .eq('estado', 'completed') as { data: any[] | null };
+      .eq('estado_pago', 'pagado') as { data: any[] | null };
 
     todayRevenue = (revenueRows ?? []).reduce((sum: number, r: any) => sum + (r.precio_cobrado ?? 0), 0);
 
@@ -76,7 +76,7 @@ export default async function DashboardPage() {
         <MetricCard
           title="Ingresos totales"
           value={`$${todayRevenue.toFixed(2)}`}
-          subtitle="Citas completadas"
+          subtitle="Citas pagadas"
         />
         <MetricCard
           title="Calificacion"
