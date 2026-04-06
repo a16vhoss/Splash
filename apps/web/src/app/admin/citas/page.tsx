@@ -42,7 +42,7 @@ export default async function CitasPage({
 
     let query = supabase
       .from('appointments')
-      .select('id, fecha, hora_inicio, estado, precio_cobrado, estacion, metodo_pago, estado_pago, notas_cliente, users!client_id(nombre), services!service_id(nombre)')
+      .select('id, fecha, hora_inicio, estado, precio_cobrado, estacion, metodo_pago, estado_pago, notas_cliente, users!client_id(nombre, telefono), services!service_id(nombre)')
       .eq('car_wash_id', carWash.id)
       .order('fecha', { ascending: false })
       .limit(50);
@@ -144,6 +144,16 @@ export default async function CitasPage({
                         </button>
                       </form>
                     )}
+                    {apt.users?.telefono && (
+                      <a
+                        href={`https://wa.me/${apt.users.telefono}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-semibold text-[#25D366] hover:underline"
+                      >
+                        WhatsApp
+                      </a>
+                    )}
                   </div>
                 </div>
               );
@@ -213,16 +223,28 @@ export default async function CitasPage({
                       <StatusBadge status={apt.estado} />
                     </td>
                     <td className="px-6 py-3">
-                      {(apt.estado === 'confirmed' || apt.estado === 'in_progress') && (
-                        <form action={completeAppointment.bind(null, apt.id)}>
-                          <button
-                            type="submit"
-                            className="text-xs font-semibold text-accent hover:underline"
+                      <div className="flex gap-2">
+                        {(apt.estado === 'confirmed' || apt.estado === 'in_progress') && (
+                          <form action={completeAppointment.bind(null, apt.id)}>
+                            <button
+                              type="submit"
+                              className="text-xs font-semibold text-accent hover:underline"
+                            >
+                              Completar
+                            </button>
+                          </form>
+                        )}
+                        {apt.users?.telefono && (
+                          <a
+                            href={`https://wa.me/${apt.users.telefono}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-semibold text-[#25D366] hover:underline"
                           >
-                            Completar
-                          </button>
-                        </form>
-                      )}
+                            WhatsApp
+                          </a>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
