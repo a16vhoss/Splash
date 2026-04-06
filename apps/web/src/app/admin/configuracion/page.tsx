@@ -6,9 +6,10 @@ import { ConfigForm } from './config-form';
 import { SlotConfig } from '@/components/slot-config';
 import { DeleteAccount } from '@/components/delete-account';
 import { AdminProfileSection } from './admin-profile';
+import { CarWashPhotoUpload } from '@/components/car-wash-photo-upload';
 
 export default async function ConfiguracionPage() {
-  const carWash = await getAdminCarWash('id, num_estaciones, metodos_pago, whatsapp, latitud, longitud, stripe_account_id, stripe_onboarding_complete, slot_duration_min') as any;
+  const carWash = await getAdminCarWash('id, num_estaciones, metodos_pago, whatsapp, latitud, longitud, stripe_account_id, stripe_onboarding_complete, slot_duration_min, fotos') as any;
 
   if (!carWash) return <p className="text-muted-foreground">No se encontro tu autolavado.</p>;
 
@@ -42,6 +43,10 @@ export default async function ConfiguracionPage() {
       {adminUser && (
         <AdminProfileSection user={adminUser} />
       )}
+      <CarWashPhotoUpload
+        carWashId={carWash.id}
+        initialFotos={carWash.fotos ?? []}
+      />
       <SlotConfig
         carWashId={carWash.id}
         slotDurationMin={carWash.slot_duration_min ?? 60}
