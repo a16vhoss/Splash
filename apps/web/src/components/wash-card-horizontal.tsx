@@ -60,13 +60,7 @@ export function WashCardHorizontal({ wash, slots, citasHoy }: WashCardHorizontal
               </Link>
             ))}
           </div>
-        ) : (
-          <div className="mt-3">
-            <span className="px-3 py-1 rounded-pill bg-primary/10 text-primary text-xs font-semibold">
-              🔔 Notificarme
-            </span>
-          </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
