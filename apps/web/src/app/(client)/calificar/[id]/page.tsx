@@ -26,8 +26,12 @@ export default function CalificarPage() {
       .select('id, fecha, estado, car_wash_id, car_washes!car_wash_id(nombre), services!service_id(nombre)')
       .eq('id', id)
       .single()
-      .then(({ data }) => {
-        setAppointment(data);
+      .then(({ data, error: fetchError }) => {
+        if (fetchError) {
+          setError('No se pudo cargar la cita');
+        } else {
+          setAppointment(data);
+        }
         setLoading(false);
       });
   }, [id]);
@@ -67,7 +71,15 @@ export default function CalificarPage() {
     );
   }
 
-  if (!appointment || appointment.estado !== 'completed') {
+  if (!appointment) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-16 text-center">
+        <p className="text-muted-foreground">{error || 'No se encontro la cita.'}</p>
+      </div>
+    );
+  }
+
+  if (appointment.estado !== 'completed') {
     return (
       <div className="max-w-lg mx-auto px-4 py-16 text-center">
         <p className="text-muted-foreground">Solo puedes calificar citas completadas.</p>
