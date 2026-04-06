@@ -162,7 +162,6 @@ export function AdminNewAppointment({ carWashId, services }: Props) {
                 <input
                   type="date"
                   value={fecha}
-                  min={todayString()}
                   onChange={(e) => setFecha(e.target.value)}
                   required
                   className={inputCls}
