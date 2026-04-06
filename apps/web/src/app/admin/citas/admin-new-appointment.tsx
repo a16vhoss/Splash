@@ -140,6 +140,18 @@ export function AdminNewAppointment({ carWashId, services }: Props) {
               </button>
             </div>
 
+            {services.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground mb-3">Primero agrega un servicio en la seccion de Servicios.</p>
+                <button
+                  type="button"
+                  onClick={() => { setOpen(false); router.push('/admin/servicios'); }}
+                  className="rounded-input bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  Ir a Servicios
+                </button>
+              </div>
+            ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Service */}
               <div>
@@ -235,6 +247,7 @@ export function AdminNewAppointment({ carWashId, services }: Props) {
                 </button>
               </div>
             </form>
+            )}
           </div>
         </div>
       )}

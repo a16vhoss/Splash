@@ -62,7 +62,7 @@ export default async function CitasPage({
           <h2 className="text-2xl font-bold text-foreground">Citas</h2>
           <p className="mt-1 text-sm text-muted-foreground">Gestion de citas de tu autolavado</p>
         </div>
-        {carWash && services.length > 0 && (
+        {carWash && (
           <AdminNewAppointment carWashId={carWash.id} services={services} />
         )}
       </div>
