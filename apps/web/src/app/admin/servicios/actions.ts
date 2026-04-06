@@ -38,7 +38,16 @@ export async function createService(formData: FormData) {
 export async function deleteService(serviceId: string) {
   const supabase = await createServerSupabase();
 
-  await supabase.from('services').delete().eq('id', serviceId);
+  const carWash = await getAdminCarWash('id');
+  if (!carWash) throw new Error('No se encontro el autolavado');
+
+  const { error } = await supabase
+    .from('services')
+    .delete()
+    .eq('id', serviceId)
+    .eq('car_wash_id', carWash.id);
+
+  if (error) throw new Error('Error al eliminar servicio');
 
   revalidatePath('/admin/servicios');
 }
@@ -46,7 +55,16 @@ export async function deleteService(serviceId: string) {
 export async function toggleService(serviceId: string, activo: boolean) {
   const supabase = await createServerSupabase();
 
-  await supabase.from('services').update({ activo }).eq('id', serviceId);
+  const carWash = await getAdminCarWash('id');
+  if (!carWash) throw new Error('No se encontro el autolavado');
+
+  const { error } = await supabase
+    .from('services')
+    .update({ activo })
+    .eq('id', serviceId)
+    .eq('car_wash_id', carWash.id);
+
+  if (error) throw new Error('Error al actualizar servicio');
 
   revalidatePath('/admin/servicios');
 }
