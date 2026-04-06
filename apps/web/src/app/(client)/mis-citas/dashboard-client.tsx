@@ -64,8 +64,23 @@ function getCountdown(fecha: string, hora: string): string {
 export function DashboardClient({ userName, upcoming, history, favorites, loyaltyCards }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const [removedFavs, setRemovedFavs] = useState<Set<string>>(new Set());
   const supabase = createClient();
   const toast = useToast();
+
+  async function removeFavorite(carWashId: string) {
+    const res = await fetch('/api/favorites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ car_wash_id: carWashId }),
+    });
+    if (res.ok) {
+      setRemovedFavs((prev) => new Set(prev).add(carWashId));
+      toast('Favorito eliminado');
+    } else {
+      toast('Error al eliminar favorito', 'error');
+    }
+  }
 
   async function hideFromHistory(appointmentId: string) {
     const { error } = await supabase
@@ -276,7 +291,7 @@ export function DashboardClient({ userName, upcoming, history, favorites, loyalt
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {favorites.map((wash) => {
+                {favorites.filter((wash) => !removedFavs.has(wash.id)).map((wash) => {
                   const foto = wash.fotos?.[0];
                   return (
                     <div key={wash.id} className="bg-white rounded-modal border border-border overflow-hidden">
@@ -286,7 +301,13 @@ export function DashboardClient({ userName, upcoming, history, favorites, loyalt
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-primary to-primary-light" />
                         )}
-                        <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center text-destructive text-sm">&#9829;</div>
+                        <button
+                          onClick={() => removeFavorite(wash.id)}
+                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center text-destructive text-sm hover:bg-white transition-colors"
+                          title="Quitar de favoritos"
+                        >
+                          &#9829;
+                        </button>
                       </div>
                       <div className="p-3">
                         <div className="font-bold text-sm text-foreground">{wash.nombre}</div>
