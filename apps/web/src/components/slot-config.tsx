@@ -234,11 +234,17 @@ export function SlotConfig({ carWashId, slotDurationMin, numEstaciones, business
                   <td className="py-2 pr-6 font-medium text-foreground">{hora}</td>
                   <td className="py-2">
                     <input
-                      type="number"
-                      min={0}
-                      max={numEstaciones}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={getCapacity(activeDay, hora)}
-                      onChange={(e) => setCapacity(activeDay, hora, Math.min(numEstaciones, Math.max(0, Number(e.target.value))))}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, '');
+                        if (raw === '') { setCapacity(activeDay, hora, 0); return; }
+                        const num = parseInt(raw, 10);
+                        setCapacity(activeDay, hora, num > numEstaciones ? numEstaciones : num);
+                      }}
+                      onFocus={(e) => e.target.select()}
                       className="w-20 rounded-input border border-border bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </td>
