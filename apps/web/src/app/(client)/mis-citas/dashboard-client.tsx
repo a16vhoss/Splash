@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import { useToast } from '@/components/toast';
 import { LoyaltyCard } from '@/components/loyalty-card';
 import { LoyaltyMini } from '@/components/loyalty-mini';
 
@@ -61,6 +63,23 @@ function getCountdown(fecha: string, hora: string): string {
 
 export function DashboardClient({ userName, upcoming, history, favorites, loyaltyCards }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState(0);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const supabase = createClient();
+  const toast = useToast();
+
+  async function hideFromHistory(appointmentId: string) {
+    const { error } = await supabase
+      .from('appointments')
+      .update({ oculta_cliente: true })
+      .eq('id', appointmentId);
+
+    if (error) {
+      toast('Error al eliminar', 'error');
+      return;
+    }
+    setHiddenIds((prev) => new Set(prev).add(appointmentId));
+    toast('Eliminado del historial');
+  }
 
   const topLoyalty = loyaltyCards[0];
 
@@ -188,13 +207,13 @@ export function DashboardClient({ userName, upcoming, history, favorites, loyalt
             {history.length === 0 ? (
               <p className="text-center text-muted-foreground py-12">Sin historial de citas</p>
             ) : (
-              history.map((apt) => {
+              history.filter((apt) => !hiddenIds.has(apt.id)).map((apt) => {
                 const cw = apt.car_washes as any;
                 const svc = apt.services as any;
                 const foto = cw?.fotos?.[0];
                 const hasReview = apt.reviews && (apt.reviews as any[]).length > 0;
                 return (
-                  <div key={apt.id} className="bg-white rounded-modal border border-border p-3.5 flex items-center justify-between">
+                  <div key={apt.id} className="bg-white rounded-modal border border-border p-3.5 flex items-center justify-between relative group">
                     <div className="flex gap-3 items-center">
                       <div className="w-11 h-11 rounded-card overflow-hidden flex-shrink-0">
                         {foto ? (
@@ -232,6 +251,13 @@ export function DashboardClient({ userName, upcoming, history, favorites, loyalt
                       >
                         Reservar de nuevo
                       </Link>
+                      <button
+                        onClick={() => hideFromHistory(apt.id)}
+                        className="text-muted-foreground hover:text-destructive px-1.5 py-1.5 text-xs transition-colors"
+                        title="Eliminar del historial"
+                      >
+                        ✕
+                      </button>
                     </div>
                   </div>
                 );
