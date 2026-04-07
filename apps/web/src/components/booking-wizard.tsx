@@ -480,7 +480,7 @@ export function BookingWizard({ carWashId, initialServiceId }: BookingWizardProp
   const router = useRouter();
   const supabase = createClient();
 
-  const [step, setStep] = useState<number>(initialServiceId ? 1 : 0);
+  const [step, setStep] = useState<number>(0);
 
   // Data
   const [services, setServices] = useState<Service[]>([]);
