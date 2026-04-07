@@ -31,7 +31,7 @@ export default async function MisCitasPage() {
     .from('appointments')
     .select('*, services(nombre), car_washes(nombre, slug, fotos), reviews!left(id)')
     .eq('client_id', user.id)
-    .in('estado', ['completed', 'cancelled', 'no_show'])
+    .in('estado', ['completed', 'cancelled', 'no_show', 'rated'])
     .neq('oculta_cliente', true)
     .order('fecha', { ascending: false })
     .limit(20);

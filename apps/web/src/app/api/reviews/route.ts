@@ -30,7 +30,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 
-  // 4. Use service role to update rating averages and create notification
+  // 4. Update appointment status to rated
+  await supabase.from('appointments').update({ estado: 'rated' }).eq('id', appointment_id);
+
+  // 5. Use service role to update rating averages and create notification
   const admin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!

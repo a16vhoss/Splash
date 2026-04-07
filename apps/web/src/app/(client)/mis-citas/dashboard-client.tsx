@@ -255,7 +255,7 @@ export function DashboardClient({ userName, upcoming, history, favorites, loyalt
                           Calificar
                         </Link>
                       )}
-                      {hasReview && (
+                      {(hasReview || apt.estado === 'rated') && (
                         <span className="bg-accent/10 text-accent px-3 py-1.5 rounded-card text-xs font-semibold">
                           Calificado
                         </span>
