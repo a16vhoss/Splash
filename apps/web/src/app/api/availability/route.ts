@@ -94,9 +94,9 @@ export async function GET(request: NextRequest) {
   const openMinutes = timeToMinutes(businessHours.hora_apertura);
   const closeMinutes = timeToMinutes(businessHours.hora_cierre);
 
-  // Filter out past slots if fecha is today
-  const today = new Date().toISOString().split('T')[0];
-  const now = new Date();
+  // Filter out past slots if fecha is today (use Mexico timezone)
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+  const today = now.toISOString().split('T')[0];
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const isToday = fecha === today;
 
