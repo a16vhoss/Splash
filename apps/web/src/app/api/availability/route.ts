@@ -95,10 +95,10 @@ export async function GET(request: NextRequest) {
   const closeMinutes = timeToMinutes(businessHours.hora_cierre);
 
   // Filter out past slots if fecha is today (use Mexico timezone)
-  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
-  const today = now.toISOString().split('T')[0];
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  const isToday = fecha === today;
+  const mxNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+  const mxToday = `${mxNow.getFullYear()}-${String(mxNow.getMonth() + 1).padStart(2, '0')}-${String(mxNow.getDate()).padStart(2, '0')}`;
+  const nowMinutes = mxNow.getHours() * 60 + mxNow.getMinutes();
+  const isToday = fecha === mxToday;
 
   const numEstaciones = carWash.num_estaciones ?? 1;
   const slots = [];
