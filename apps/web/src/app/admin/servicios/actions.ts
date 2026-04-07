@@ -35,7 +35,7 @@ export async function createService(formData: FormData) {
   revalidatePath('/admin/servicios');
 }
 
-export async function deleteService(serviceId: string) {
+export async function deleteService(serviceId: string): Promise<{ deactivated?: boolean }> {
   const supabase = await createServerSupabase();
 
   const carWash = await getAdminCarWash('id');
@@ -55,7 +55,8 @@ export async function deleteService(serviceId: string) {
       .eq('id', serviceId)
       .eq('car_wash_id', carWash.id);
 
-    throw new Error('Este servicio tiene citas asociadas. Se desactivo en su lugar.');
+    revalidatePath('/admin/servicios');
+    return { deactivated: true };
   }
 
   const { error } = await supabase
@@ -67,6 +68,7 @@ export async function deleteService(serviceId: string) {
   if (error) throw new Error('Error al eliminar servicio');
 
   revalidatePath('/admin/servicios');
+  return {};
 }
 
 export async function toggleService(serviceId: string, activo: boolean) {
