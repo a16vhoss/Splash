@@ -37,7 +37,7 @@ export function Topbar({ carWashes, selectedCarWashId }: TopbarProps) {
           <BusinessSwitcher carWashes={carWashes} selectedId={selectedCarWashId ?? null} />
         )}
       </div>
-      <NotificationBell />
+      <NotificationBell role="wash_admin" />
     </header>
   );
 }

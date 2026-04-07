@@ -57,7 +57,7 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <>
-            <NotificationBell />
+            <NotificationBell role={role} />
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}

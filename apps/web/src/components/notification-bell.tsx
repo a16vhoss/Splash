@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Notification {
   id: string;
@@ -9,6 +10,11 @@ interface Notification {
   mensaje: string;
   leida: boolean;
   created_at: string;
+  appointment_id: string | null;
+}
+
+interface NotificationBellProps {
+  role?: string | null;
 }
 
 const typeIcons: Record<string, string> = {
@@ -28,7 +34,8 @@ function timeAgo(dateStr: string): string {
   return `hace ${days}d`;
 }
 
-export function NotificationBell() {
+export function NotificationBell({ role }: NotificationBellProps) {
+  const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -107,7 +114,15 @@ export function NotificationBell() {
             notifications.map((n) => (
               <button
                 key={n.id}
-                onClick={() => markRead(n.id)}
+                onClick={() => {
+                  markRead(n.id);
+                  setOpen(false);
+                  if (role === 'wash_admin') {
+                    router.push('/admin/citas');
+                  } else {
+                    router.push('/mis-citas');
+                  }
+                }}
                 className={`w-full text-left px-4 py-3 border-b border-border last:border-0 hover:bg-muted/50 transition-colors ${!n.leida ? 'bg-primary/5' : ''}`}
               >
                 <div className="flex items-start gap-2">
