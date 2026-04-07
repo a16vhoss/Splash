@@ -42,8 +42,11 @@ function getNext14Days(): { date: string; dayName: string; dayNum: number; month
   for (let i = 0; i < 14; i++) {
     const d = new Date();
     d.setDate(d.getDate() + i);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
     result.push({
-      date: d.toISOString().split('T')[0],
+      date: `${yyyy}-${mm}-${dd}`,
       dayName: DAYS[d.getDay()],
       dayNum: d.getDate(),
       month: MONTHS[d.getMonth()],
