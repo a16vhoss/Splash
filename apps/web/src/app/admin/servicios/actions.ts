@@ -41,6 +41,23 @@ export async function deleteService(serviceId: string) {
   const carWash = await getAdminCarWash('id');
   if (!carWash) throw new Error('No se encontro el autolavado');
 
+  // Check if service has appointments
+  const { count } = await supabase
+    .from('appointments')
+    .select('id', { count: 'exact', head: true })
+    .eq('service_id', serviceId);
+
+  if (count && count > 0) {
+    // Can't delete — deactivate instead
+    await supabase
+      .from('services')
+      .update({ activo: false })
+      .eq('id', serviceId)
+      .eq('car_wash_id', carWash.id);
+
+    throw new Error('Este servicio tiene citas asociadas. Se desactivo en su lugar.');
+  }
+
   const { error } = await supabase
     .from('services')
     .delete()

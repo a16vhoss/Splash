@@ -35,8 +35,13 @@ export function ServiceTable({ services }: { services: Service[] }) {
       try {
         await deleteService(id);
         toast('Servicio eliminado');
-      } catch {
-        toast('Error al eliminar servicio', 'error');
+      } catch (err: any) {
+        const msg = err?.message ?? '';
+        if (msg.includes('desactivo')) {
+          toast('Tiene citas asociadas, se desactivo', 'error');
+        } else {
+          toast('Error al eliminar servicio', 'error');
+        }
       }
     });
   }
