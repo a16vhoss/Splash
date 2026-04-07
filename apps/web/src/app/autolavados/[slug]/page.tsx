@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { PhotoGallery } from '@/components/photo-gallery';
-import { BookingWidget } from '@/components/booking-widget';
 import { BookingBottomBar } from '@/components/booking-bottom-bar';
 import { RatingBreakdown } from '@/components/rating-breakdown';
 import { FavoriteButton } from '@/components/favorite-button';
@@ -298,14 +297,6 @@ export default async function CarWashProfilePage({
               </section>
             </div>
 
-            {/* Booking Widget - sidebar, hidden on mobile */}
-            <div className="hidden lg:block w-[320px] flex-shrink-0">
-              <BookingWidget
-                carWashId={carWash.id}
-                services={services ?? []}
-                carWashName={carWash.nombre}
-              />
-            </div>
           </div>
         </div>
 
