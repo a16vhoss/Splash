@@ -94,9 +94,17 @@ export async function GET(request: NextRequest) {
   const openMinutes = timeToMinutes(businessHours.hora_apertura);
   const closeMinutes = timeToMinutes(businessHours.hora_cierre);
 
+  // Filter out past slots if fecha is today
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const isToday = fecha === today;
+
   const numEstaciones = carWash.num_estaciones ?? 1;
   const slots = [];
   for (let start = openMinutes; start + slot_duration_min <= closeMinutes; start += slot_duration_min) {
+    if (isToday && start <= nowMinutes) continue;
+
     const time = minutesToTime(start);
     const rawCapacidad = capacityMap.get(time) ?? numEstaciones;
     const capacidad = Math.min(rawCapacidad, numEstaciones);
