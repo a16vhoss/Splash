@@ -94,10 +94,14 @@ export async function GET(request: NextRequest) {
   const openMinutes = timeToMinutes(businessHours.hora_apertura);
   const closeMinutes = timeToMinutes(businessHours.hora_cierre);
 
-  // Filter out past slots if fecha is today (use Mexico timezone)
-  const mxNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
-  const mxToday = `${mxNow.getFullYear()}-${String(mxNow.getMonth() + 1).padStart(2, '0')}-${String(mxNow.getDate()).padStart(2, '0')}`;
-  const nowMinutes = mxNow.getHours() * 60 + mxNow.getMinutes();
+  // Filter out past slots if fecha is today (Mexico is UTC-6, CDT is UTC-5)
+  const utcNow = new Date();
+  const MX_OFFSET = -6; // CST; change to -5 during daylight saving if needed
+  const mxMs = utcNow.getTime() + MX_OFFSET * 3600000;
+  const mxDate = new Date(mxMs);
+  const mxToday = mxDate.toISOString().split('T')[0];
+  const mxTimeStr = mxDate.toISOString().split('T')[1];
+  const nowMinutes = parseInt(mxTimeStr.slice(0, 2)) * 60 + parseInt(mxTimeStr.slice(3, 5));
   const isToday = fecha === mxToday;
 
   const numEstaciones = carWash.num_estaciones ?? 1;
