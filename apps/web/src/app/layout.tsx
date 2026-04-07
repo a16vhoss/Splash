@@ -1,5 +1,5 @@
 import { ToastProvider } from '@/components/toast';
-import { BottomNav } from '@/components/bottom-nav';
+import { BottomTabBar } from '@/components/bottom-tab-bar';
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans antialiased">
         <ToastProvider>
           {children}
-          <BottomNav />
+          <BottomTabBar />
         </ToastProvider>
       </body>
     </html>

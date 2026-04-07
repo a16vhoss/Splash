@@ -55,6 +55,10 @@ const tabs = [
 export function BottomTabBar() {
   const pathname = usePathname();
 
+  if (pathname.startsWith('/admin') || pathname.startsWith('/super') || pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/reset-password')) {
+    return null;
+  }
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/95 backdrop-blur-md md:hidden">
       <div className="flex items-center justify-around h-16 px-2">

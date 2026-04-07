@@ -39,7 +39,7 @@ export default async function AutolavadosPage({
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 max-w-7xl mx-auto px-4 py-6 w-full">
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-6 pb-20 md:pb-6 w-full">
         <AutolavadosListing
           washes={washes ?? []}
           query={params.q}

@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic';
 import { Suspense } from 'react';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
-import { BottomTabBar } from '@/components/bottom-tab-bar';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +10,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <Navbar />
       <main className="flex-1 pb-20 md:pb-0"><Suspense>{children}</Suspense></main>
       <div className="hidden md:block"><Footer /></div>
-      <BottomTabBar />
     </div>
   );
 }
