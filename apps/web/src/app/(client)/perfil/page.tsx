@@ -17,6 +17,9 @@ export default function PerfilPage() {
   const [editingName, setEditingName] = useState(false);
   const [nombre, setNombre] = useState('');
   const [savingName, setSavingName] = useState(false);
+  const [editingPhone, setEditingPhone] = useState(false);
+  const [telefono, setTelefono] = useState('');
+  const [savingPhone, setSavingPhone] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user: authUser } }) => {
@@ -25,6 +28,7 @@ export default function PerfilPage() {
         .then(({ data }) => {
           setUser(data);
           setNombre(data?.nombre ?? '');
+          setTelefono(data?.telefono ?? '');
           setLoading(false);
         });
     });
@@ -38,6 +42,16 @@ export default function PerfilPage() {
     setEditingName(false);
     setSavingName(false);
     toast('Nombre actualizado');
+  }
+
+  async function handleSavePhone() {
+    if (!user) return;
+    setSavingPhone(true);
+    await supabase.from('users').update({ telefono: telefono.trim() || null }).eq('id', user.id);
+    setUser({ ...user, telefono: telefono.trim() || null });
+    setEditingPhone(false);
+    setSavingPhone(false);
+    toast('Telefono actualizado');
   }
 
   async function handleLogout() {
@@ -102,6 +116,41 @@ export default function PerfilPage() {
             </div>
           )}
           <p className="text-sm text-muted-foreground">{user?.email}</p>
+          {editingPhone ? (
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
+                placeholder="Ej: 5512345678"
+                inputMode="tel"
+                className="rounded-input border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring flex-1"
+                autoFocus
+              />
+              <button
+                onClick={handleSavePhone}
+                disabled={savingPhone}
+                className="rounded-input bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90"
+              >
+                {savingPhone ? '...' : 'Guardar'}
+              </button>
+              <button
+                onClick={() => { setEditingPhone(false); setTelefono(user?.telefono ?? ''); }}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-xs text-muted-foreground">{user?.telefono || 'Sin telefono'}</p>
+              <button
+                onClick={() => setEditingPhone(true)}
+                className="text-xs text-primary hover:underline"
+              >
+                {user?.telefono ? 'Cambiar' : 'Agregar'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
