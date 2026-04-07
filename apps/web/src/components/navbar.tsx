@@ -108,7 +108,6 @@ export function Navbar() {
       {menuOpen && (
         <div className="md:hidden border-t border-border bg-white px-4 py-4 space-y-3">
           <Link href="/autolavados" className="block text-sm font-semibold text-foreground" onClick={() => setMenuOpen(false)}>Autolavados</Link>
-          <Link href="/autolavados" className="block text-sm font-semibold text-foreground" onClick={() => setMenuOpen(false)}>Autolavados</Link>
           {user ? (
             <>
               <Link href="/mis-citas" className="block text-sm font-semibold text-foreground" onClick={() => setMenuOpen(false)}>Mis Citas</Link>
