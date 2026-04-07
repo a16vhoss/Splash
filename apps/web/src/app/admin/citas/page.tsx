@@ -137,7 +137,7 @@ export default async function CitasPage({
                         </button>
                       </form>
                     )}
-                    {(apt.estado === 'confirmed' || apt.estado === 'in_progress') && (
+                    {(apt.estado === 'confirmed' || apt.estado === 'in_progress' || apt.estado === 'no_show') && (
                       <form action={completeAppointment.bind(null, apt.id)}>
                         <button type="submit" className="text-xs font-semibold text-accent hover:underline">
                           Completar

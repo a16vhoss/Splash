@@ -19,8 +19,8 @@ export async function completeAppointment(appointmentId: string) {
     .single();
 
   if (!appointment) throw new Error('Cita no encontrada');
-  if (appointment.estado !== 'confirmed' && appointment.estado !== 'in_progress') {
-    throw new Error('Solo se pueden completar citas confirmadas o en progreso');
+  if (appointment.estado !== 'confirmed' && appointment.estado !== 'in_progress' && appointment.estado !== 'no_show') {
+    throw new Error('Solo se pueden completar citas confirmadas, en progreso o vencidas');
   }
 
   await supabase
