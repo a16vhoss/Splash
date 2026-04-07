@@ -80,7 +80,7 @@ export default function CalificarPage() {
     );
   }
 
-  if (appointment.estado !== 'completed') {
+  if (appointment.estado !== 'completed' && appointment.estado !== 'no_show') {
     return (
       <div className="max-w-lg mx-auto px-4 py-16 text-center">
         <p className="text-muted-foreground">Solo puedes calificar citas completadas.</p>

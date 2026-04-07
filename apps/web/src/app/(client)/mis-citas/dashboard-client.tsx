@@ -247,7 +247,7 @@ export function DashboardClient({ userName, upcoming, history, favorites, loyalt
                       </div>
                     </div>
                     <div className="flex gap-1.5">
-                      {apt.estado === 'completed' && !hasReview && (
+                      {(apt.estado === 'completed' || apt.estado === 'no_show') && !hasReview && (
                         <Link
                           href={`/calificar/${apt.id}`}
                           className="bg-accent text-white px-3 py-1.5 rounded-card text-xs font-semibold hover:bg-accent/90 transition-colors"
