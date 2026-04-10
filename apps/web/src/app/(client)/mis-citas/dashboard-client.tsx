@@ -64,6 +64,7 @@ function getCountdown(fecha: string, hora: string): string {
 export function DashboardClient({ userName, upcoming, history, favorites, loyaltyCards }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const [cancelledIds, setCancelledIds] = useState<Set<string>>(new Set());
   const [removedFavs, setRemovedFavs] = useState<Set<string>>(new Set());
   const supabase = createClient();
   const toast = useToast();
@@ -79,6 +80,23 @@ export function DashboardClient({ userName, upcoming, history, favorites, loyalt
       toast('Favorito eliminado');
     } else {
       toast('Error al eliminar favorito', 'error');
+    }
+  }
+
+  async function cancelAppointment(appointmentId: string) {
+    if (!confirm('¿Estás seguro de que deseas cancelar esta cita?')) return;
+
+    const res = await fetch(`/api/appointments/${appointmentId}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (res.ok) {
+      setCancelledIds((prev) => new Set(prev).add(appointmentId));
+      toast('Cita cancelada exitosamente');
+    } else {
+      const data = await res.json().catch(() => ({ error: 'Error al cancelar' }));
+      toast(data.error || 'Error al cancelar la cita', 'error');
     }
   }
 
@@ -142,7 +160,7 @@ export function DashboardClient({ userName, upcoming, history, favorites, loyalt
                 <Link href="/autolavados" className="text-sm text-primary font-semibold hover:underline mt-2 inline-block">Buscar autolavados</Link>
               </div>
             ) : (
-              upcoming.map((apt) => {
+              upcoming.filter((apt) => !cancelledIds.has(apt.id)).map((apt) => {
                 const cw = apt.car_washes as any;
                 const svc = apt.services as any;
                 const foto = cw?.fotos?.[0];
@@ -202,12 +220,13 @@ export function DashboardClient({ userName, upcoming, history, favorites, loyalt
                           WhatsApp
                         </a>
                       )}
-                      <Link
-                        href={`/mis-citas?cancel=${apt.id}`}
+                      <button
+                        type="button"
+                        onClick={() => cancelAppointment(apt.id)}
                         className="flex-1 bg-destructive/10 py-2 rounded-card text-center text-xs font-semibold text-destructive hover:bg-destructive/20 transition-colors"
                       >
                         Cancelar
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 );

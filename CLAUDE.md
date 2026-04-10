@@ -211,6 +211,7 @@ Example:
 - **Client double-booking:** The booking API must check for overlapping appointments across ALL car washes for the same client, not just capacity at the target car wash. The availability API must return `clienteOcupado` on conflicting slots.
 - **Empty page states:** Pages accessed via bottom tab bar (like `/agendar`) must handle the case where no query parameters are provided — show a selector or list instead of a blank screen.
 - **Analytics canonical metric:** Revenue and unit counts use only `estado IN ('completed', 'rated')`. Never sum all `estado_pago = 'pagado'` without filtering by estado — it inflates numbers with future/pending appointments.
+- **Client-side actions over Link navigation:** Destructive actions (cancel, delete) must use `<button>` with `fetch()` + confirmation dialog, never `<Link>` to a URL with query params. Server-side page components don't reliably handle action params — the page just reloads without doing anything.
 
 ## Environment Variables
 
