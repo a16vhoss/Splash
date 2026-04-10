@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { CarWashMap } from '@/components/car-wash-map';
+import dynamic from 'next/dynamic';
+
+// Leaflet touches `window` at module load time, so we must defer loading until
+// the client mounts. `next/dynamic` with `ssr: false` prevents SSR evaluation.
+const CarWashMap = dynamic(
+  () => import('@/components/car-wash-map').then((m) => m.CarWashMap),
+  { ssr: false }
+);
 
 interface CarWash {
   id: string;
