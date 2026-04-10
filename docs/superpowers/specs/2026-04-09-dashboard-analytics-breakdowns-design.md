@@ -293,12 +293,13 @@ Empieza en **lunes** (ISO 8601 / estándar MX). Se calcula con `date-fns`/`date-
 
 ## Implementación y detalles técnicos
 
-### Dependencias nuevas
+### Dependencias
 
-- `recharts` — librería de gráficas React. Se instala en `apps/web`.
-- `date-fns` y `date-fns-tz` — manejo de fechas con timezone. Se reutilizan si ya existen; si no, se agregan.
+- `recharts` ^3.8.1 — **ya instalada** en `apps/web`. Se usa para las gráficas.
+- `date-fns` y `date-fns-tz` — **nuevas**. Se agregan a `apps/web` para manejo de fechas con timezone `America/Mexico_City`.
+- `node:test` (built-in) — runner de tests unitarios para `date-ranges.ts`. No requiere dependencia nueva.
 
-Ninguna otra dependencia. Nada de Chart.js, D3, moment.
+Ninguna otra dependencia. Nada de Chart.js, D3, moment, Vitest, Jest.
 
 ### Componentes nuevos
 
@@ -374,5 +375,5 @@ function formatDelta(current: number, previous: number): { value: string; positi
 
 ### Testing
 
-- **Tests unitarios** para `date-ranges.ts` (Vitest o equivalente) — las funciones de rangos y comparación son críticas y fáciles de romper con edge cases de timezone, fin de mes, lunes, cambio de año.
+- **Tests unitarios** para `date-ranges.ts` usando `node:test` (built-in de Node, sin dependencias nuevas) — las funciones de rangos y comparación son críticas y fáciles de romper con edge cases de timezone, fin de mes, lunes, cambio de año.
 - **E2E mínimo** en `apps/web/e2e/admin-round*`: navegar a dashboard, verificar que las 3 tarjetas existen y no crashean; navegar a reportes, cambiar toggle de agrupación, verificar que la gráfica se re-renderiza sin errores.
