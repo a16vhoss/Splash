@@ -1,45 +1,137 @@
+// apps/web/src/app/admin/dashboard/page.tsx
 export const dynamic = 'force-dynamic';
 
 import { createServerSupabase } from '@/lib/supabase/server';
 import { getAdminCarWash } from '@/lib/admin-car-wash';
 import { MetricCard } from '@/components/metric-card';
 import { StatusBadge } from '@/components/status-badge';
+import { PeriodCard } from '@/components/period-card';
+import { TopServicesCard } from '@/components/top-services-card';
 import { completeAppointment } from '@/app/admin/citas/actions';
+import {
+  fetchCompletedAppointments,
+  aggregateTotals,
+} from '@/lib/analytics-helpers';
+import {
+  getTodayRange,
+  getThisWeekRange,
+  getThisMonthRange,
+  getYesterdayRange,
+  getLastWeekToTodayRange,
+  getLastMonthToTodayRange,
+  getCurrentHourCutoff,
+  getLastNDaysRanges,
+  getLastNWeeksRanges,
+  getLastNMonthsRanges,
+} from '@/lib/date-ranges';
+
+interface TopService {
+  serviceName: string;
+  units: number;
+  revenue: number;
+  pctOfUnits: number;
+}
+
+async function fetchSparklineRevenue(
+  supabase: Awaited<ReturnType<typeof createServerSupabase>>,
+  carWashId: string,
+  ranges: Array<{ from: string; to: string }>
+): Promise<number[]> {
+  const results = await Promise.all(
+    ranges.map((range) => fetchCompletedAppointments(supabase, carWashId, range))
+  );
+  return results.map((rows) => aggregateTotals(rows).revenue);
+}
+
+function computeTopServices(
+  rows: Array<{ service_name: string; precio_cobrado: number | null }>,
+  limit: number
+): TopService[] {
+  const totals = new Map<string, { units: number; revenue: number }>();
+  for (const row of rows) {
+    const key = row.service_name;
+    const current = totals.get(key) ?? { units: 0, revenue: 0 };
+    current.units += 1;
+    current.revenue += Number(row.precio_cobrado ?? 0);
+    totals.set(key, current);
+  }
+  const totalUnits = rows.length;
+  return Array.from(totals.entries())
+    .map(([serviceName, stats]) => ({
+      serviceName,
+      units: stats.units,
+      revenue: stats.revenue,
+      pctOfUnits: totalUnits > 0 ? Math.round((stats.units / totalUnits) * 100) : 0,
+    }))
+    .sort((a, b) => b.units - a.units)
+    .slice(0, limit);
+}
 
 export default async function DashboardPage() {
   const supabase = await createServerSupabase();
-  const carWash = await getAdminCarWash('id, nombre, rating_promedio, total_reviews, activo, subscription_status') as any;
+  const carWash = await getAdminCarWash('id, nombre, rating_promedio, total_reviews, activo, subscription_status') as {
+    id: string;
+    nombre: string;
+    rating_promedio: number | null;
+    total_reviews: number | null;
+    activo: boolean | null;
+    subscription_status: string | null;
+  } | null;
 
   const today = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
-  let todayCount = 0;
-  let yesterdayCount = 0;
-  let todayRevenue = 0;
-  let upcomingAppointments: any[] = [];
+  let todayData = { units: 0, revenue: 0, prevUnits: 0, prevRevenue: 0, sparkline: [] as number[] };
+  let weekData = { units: 0, revenue: 0, prevUnits: 0, prevRevenue: 0, sparkline: [] as number[] };
+  let monthData = { units: 0, revenue: 0, prevUnits: 0, prevRevenue: 0, sparkline: [] as number[] };
+  let topServicesMonth: TopService[] = [];
+  let upcomingAppointments: Array<{
+    id: string;
+    fecha: string;
+    hora_inicio: string;
+    estado: string;
+    precio_cobrado: number | null;
+    estacion: number | null;
+    users: { nombre: string | null; email: string } | null;
+    services: { nombre: string } | null;
+  }> = [];
 
   if (carWash) {
-    const { count: tc } = await supabase
-      .from('appointments')
-      .select('id', { count: 'exact', head: true })
-      .eq('car_wash_id', carWash.id)
-      .eq('fecha', today);
-    todayCount = tc ?? 0;
+    const now = new Date();
+    const hourCutoff = getCurrentHourCutoff(now);
 
-    const { count: yc } = await supabase
-      .from('appointments')
-      .select('id', { count: 'exact', head: true })
-      .eq('car_wash_id', carWash.id)
-      .eq('fecha', yesterday);
-    yesterdayCount = yc ?? 0;
+    const [
+      todayRows,
+      yesterdayRows,
+      weekRows,
+      lastWeekRows,
+      monthRows,
+      lastMonthRows,
+      sparklineDays,
+      sparklineWeeks,
+      sparklineMonths,
+    ] = await Promise.all([
+      fetchCompletedAppointments(supabase, carWash.id, getTodayRange(now), hourCutoff),
+      fetchCompletedAppointments(supabase, carWash.id, getYesterdayRange(now), hourCutoff),
+      fetchCompletedAppointments(supabase, carWash.id, getThisWeekRange(now)),
+      fetchCompletedAppointments(supabase, carWash.id, getLastWeekToTodayRange(now)),
+      fetchCompletedAppointments(supabase, carWash.id, getThisMonthRange(now)),
+      fetchCompletedAppointments(supabase, carWash.id, getLastMonthToTodayRange(now)),
+      fetchSparklineRevenue(supabase, carWash.id, getLastNDaysRanges(7, now)),
+      fetchSparklineRevenue(supabase, carWash.id, getLastNWeeksRanges(8, now)),
+      fetchSparklineRevenue(supabase, carWash.id, getLastNMonthsRanges(6, now)),
+    ]);
 
-    const { data: revenueRows } = await supabase
-      .from('appointments')
-      .select('precio_cobrado')
-      .eq('car_wash_id', carWash.id)
-      .eq('estado_pago', 'pagado') as { data: any[] | null };
+    const t = aggregateTotals(todayRows);
+    const y = aggregateTotals(yesterdayRows);
+    const w = aggregateTotals(weekRows);
+    const lw = aggregateTotals(lastWeekRows);
+    const m = aggregateTotals(monthRows);
+    const lm = aggregateTotals(lastMonthRows);
 
-    todayRevenue = (revenueRows ?? []).reduce((sum: number, r: any) => sum + (r.precio_cobrado ?? 0), 0);
+    todayData = { ...t, prevUnits: y.units, prevRevenue: y.revenue, sparkline: sparklineDays };
+    weekData = { ...w, prevUnits: lw.units, prevRevenue: lw.revenue, sparkline: sparklineWeeks };
+    monthData = { ...m, prevUnits: lm.units, prevRevenue: lm.revenue, sparkline: sparklineMonths };
+    topServicesMonth = computeTopServices(monthRows, 3);
 
     const { data: upcoming } = await supabase
       .from('appointments')
@@ -48,13 +140,10 @@ export default async function DashboardPage() {
       .gte('fecha', today)
       .order('fecha', { ascending: true })
       .order('hora_inicio', { ascending: true })
-      .limit(10) as { data: any[] | null };
+      .limit(10);
 
-    upcomingAppointments = upcoming ?? [];
+    upcomingAppointments = (upcoming ?? []) as unknown as typeof upcomingAppointments;
   }
-
-  const trendDiff = todayCount - yesterdayCount;
-  const trendVal = trendDiff === 0 ? '0' : Math.abs(trendDiff).toString();
 
   const rating = carWash?.rating_promedio ?? 0;
   const totalReviews = carWash?.total_reviews ?? 0;
@@ -66,18 +155,8 @@ export default async function DashboardPage() {
         <h2 className="text-2xl font-bold text-foreground">Dashboard</h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Citas hoy"
-          value={todayCount.toString()}
-          trend={{ value: trendVal, positive: trendDiff >= 0 }}
-          subtitle="vs ayer"
-        />
-        <MetricCard
-          title="Ingresos totales"
-          value={`$${todayRevenue.toFixed(2)}`}
-          subtitle="Citas pagadas"
-        />
+      {/* Status row: rating + status */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <MetricCard
           title="Calificacion"
           value={rating > 0 ? rating.toFixed(1) : '—'}
@@ -90,6 +169,38 @@ export default async function DashboardPage() {
         />
       </div>
 
+      {/* Period cards: today / week / month */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <PeriodCard
+          label="Hoy"
+          units={todayData.units}
+          revenue={todayData.revenue}
+          prevUnits={todayData.prevUnits}
+          prevRevenue={todayData.prevRevenue}
+          sparkline={todayData.sparkline}
+        />
+        <PeriodCard
+          label="Esta semana"
+          units={weekData.units}
+          revenue={weekData.revenue}
+          prevUnits={weekData.prevUnits}
+          prevRevenue={weekData.prevRevenue}
+          sparkline={weekData.sparkline}
+        />
+        <PeriodCard
+          label="Este mes"
+          units={monthData.units}
+          revenue={monthData.revenue}
+          prevUnits={monthData.prevUnits}
+          prevRevenue={monthData.prevRevenue}
+          sparkline={monthData.sparkline}
+        />
+      </div>
+
+      {/* Top services of the month */}
+      <TopServicesCard services={topServicesMonth} />
+
+      {/* Upcoming appointments */}
       <div className="rounded-card bg-card shadow-card">
         <div className="border-b border-border px-6 py-4">
           <h3 className="text-sm font-semibold text-foreground">Proximas citas</h3>
@@ -102,7 +213,7 @@ export default async function DashboardPage() {
           <>
           {/* Mobile card view */}
           <div className="md:hidden divide-y divide-border">
-            {upcomingAppointments.map((apt: any) => (
+            {upcomingAppointments.map((apt) => (
               <div key={apt.id} className="px-4 py-3 space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-foreground text-sm">{apt.users?.nombre || apt.users?.email || '—'}</span>
@@ -137,7 +248,7 @@ export default async function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {upcomingAppointments.map((apt: any) => (
+                {upcomingAppointments.map((apt) => (
                   <tr key={apt.id} className="border-b border-border last:border-0 hover:bg-muted/30">
                     <td className="px-6 py-3 font-medium text-foreground">
                       {apt.users?.nombre || apt.users?.email || '—'}

@@ -2,9 +2,16 @@
 
 import { useState, useTransition, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useToast } from '@/components/toast';
-import { LocationPicker } from '@/components/location-picker';
 import { saveConfig } from './actions';
+
+// Leaflet touches `window` at module load time, so we must defer loading until
+// the client mounts. `next/dynamic` with `ssr: false` prevents SSR evaluation.
+const LocationPicker = dynamic(
+  () => import('@/components/location-picker').then((m) => m.LocationPicker),
+  { ssr: false }
+);
 
 const METHODS = [
   { value: 'efectivo', label: 'Efectivo' },

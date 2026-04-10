@@ -10,3 +10,4 @@ ios/
 android/
 .vercel
 .env*.local
+.test-credentials.json

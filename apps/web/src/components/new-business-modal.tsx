@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { LocationPicker } from './location-picker';
+import dynamic from 'next/dynamic';
+
+// Leaflet touches `window` at module load time, so we must defer loading until
+// the client mounts. `next/dynamic` with `ssr: false` prevents SSR evaluation.
+const LocationPicker = dynamic(
+  () => import('./location-picker').then((m) => m.LocationPicker),
+  { ssr: false }
+);
 
 interface NewBusinessModalProps {
   onClose: () => void;
