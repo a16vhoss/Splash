@@ -47,4 +47,55 @@ test.describe('Admin analytics breakdowns', () => {
 
     expect(errors).toHaveLength(0);
   });
+
+  test('reportes: Excel download triggers download with correct filename pattern', async ({ page }) => {
+    await page.goto('/admin/reportes');
+    await page.waitForResponse(
+      (r) => r.url().includes('/api/admin/analytics') && r.status() === 200,
+      { timeout: 10000 }
+    );
+
+    // Wait for the button to become enabled (data loaded)
+    const excelButton = page.getByRole('button', { name: /Excel/ });
+    await expect(excelButton).toBeVisible();
+
+    // Click may or may not produce a download depending on whether there is data.
+    // We expect the button to be visible; if there's no data it's disabled and
+    // downloading is skipped. This test tolerates both.
+    const isDisabled = await excelButton.isDisabled();
+    if (isDisabled) {
+      test.info().annotations.push({ type: 'skip', description: 'No data available; button disabled' });
+      return;
+    }
+
+    const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
+    await excelButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/^splash-.*\.xlsx$/);
+  });
+
+  test('reportes: PDF download triggers download with correct filename pattern', async ({ page }) => {
+    await page.goto('/admin/reportes');
+    await page.waitForResponse(
+      (r) => r.url().includes('/api/admin/analytics') && r.status() === 200,
+      { timeout: 10000 }
+    );
+
+    const pdfButton = page.getByRole('button', { name: /PDF/ });
+    await expect(pdfButton).toBeVisible();
+
+    const isDisabled = await pdfButton.isDisabled();
+    if (isDisabled) {
+      test.info().annotations.push({ type: 'skip', description: 'No data available; button disabled' });
+      return;
+    }
+
+    // PDF generation captures charts via html2canvas which takes ~3-5 seconds
+    const downloadPromise = page.waitForEvent('download', { timeout: 20000 });
+    await pdfButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/^splash-.*\.pdf$/);
+  });
 });
