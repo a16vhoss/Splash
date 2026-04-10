@@ -165,6 +165,53 @@ Migrations in `supabase/migrations/`:
 - `012_admin_pro.sql` — Review replies (`respuesta_admin`, `respuesta_fecha`), messaging system (`messages` table)
 - `seed.sql` — Seed data
 
+## Self-Improvement Loop
+
+After every bug fix, correction, or learning during a session, Claude MUST update this file and/or memory with what was learned. This creates a feedback loop where mistakes are never repeated.
+
+### When to trigger
+
+- A bug is found and fixed (e.g., a missing enum value, a broken page, a validation gap)
+- The user corrects Claude's approach ("no, don't do it that way")
+- A pattern is discovered that applies broadly (e.g., "all Leaflet imports must use `next/dynamic`")
+- A new convention is established (e.g., "rated counts as completed for metrics")
+
+### What to update
+
+1. **CLAUDE.md** — if the learning is a project-wide rule or convention that any future Claude instance needs to know. Add it to the most relevant section (Key Conventions, Architecture, etc.).
+2. **Memory files** — if the learning is about user preferences, workflow patterns, or context that helps but isn't strictly a codebase rule. Use the `feedback` memory type.
+3. **Both** — if it's both a codebase convention AND a behavioral preference.
+
+### Format
+
+Add learnings as concise bullet points in the relevant section. Use this pattern:
+
+```
+- **[What]:** [Rule]. [Why — what broke without it].
+```
+
+Example:
+```
+- **Rated status:** `rated` must be treated as equivalent to `completed` in all metrics, badge components, and filter tabs. The `rated` enum was added in migration 018 but several files were missed.
+```
+
+### Rules
+
+- Update IMMEDIATELY after the fix, not at the end of the session — context decays.
+- Never add vague rules ("be careful with X"). Always be specific and actionable.
+- If a rule already exists but was insufficient, strengthen it — don't duplicate.
+- Remove rules that are no longer true (e.g., if code was refactored to eliminate the concern).
+- Keep the total additions concise — one line per learning, not paragraphs.
+
+### Learned Rules
+
+- **Rated status:** `rated` must be treated identically to `completed` in all metric queries (`.in('estado', ['completed', 'rated'])`), status badge components (label: "Calificada"), and filter tabs. Exception: cron jobs for review-requests and re-engagement intentionally target only `completed` (rated already engaged).
+- **Leaflet SSR:** Any component importing `leaflet` directly (`import L from 'leaflet'`) must be wrapped with `next/dynamic({ ssr: false })` in its consumer — Leaflet touches `window` at module load time and crashes SSR. Affected: `location-picker.tsx`, `car-wash-map.tsx`.
+- **Booking wizard flow:** Service selection must NOT auto-advance to the next step. Show an explicit "Continuar" button so the user can toggle extras before proceeding.
+- **Client double-booking:** The booking API must check for overlapping appointments across ALL car washes for the same client, not just capacity at the target car wash. The availability API must return `clienteOcupado` on conflicting slots.
+- **Empty page states:** Pages accessed via bottom tab bar (like `/agendar`) must handle the case where no query parameters are provided — show a selector or list instead of a blank screen.
+- **Analytics canonical metric:** Revenue and unit counts use only `estado IN ('completed', 'rated')`. Never sum all `estado_pago = 'pagado'` without filtering by estado — it inflates numbers with future/pending appointments.
+
 ## Environment Variables
 
 See `.env.example` for the full list. Required for web dev:
