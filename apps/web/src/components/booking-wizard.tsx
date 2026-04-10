@@ -123,6 +123,7 @@ function StepService({
   selectedExtras,
   onSelectService,
   onToggleExtra,
+  onNext,
 }: {
   services: Service[];
   extras: Service[];
@@ -130,6 +131,7 @@ function StepService({
   selectedExtras: string[];
   onSelectService: (id: string) => void;
   onToggleExtra: (id: string) => void;
+  onNext: () => void;
 }) {
   const selectedService = services.find((s) => s.id === selectedServiceId);
   const extrasTotal = extras
@@ -202,10 +204,19 @@ function StepService({
       )}
 
       {selectedService && (
-        <div className="flex items-center justify-between py-3 border-t border-border">
-          <span className="text-sm font-medium text-muted-foreground">Total estimado</span>
-          <span className="text-lg font-bold text-foreground">${total.toLocaleString('es-MX')}</span>
-        </div>
+        <>
+          <div className="flex items-center justify-between py-3 border-t border-border">
+            <span className="text-sm font-medium text-muted-foreground">Total estimado</span>
+            <span className="text-lg font-bold text-foreground">${total.toLocaleString('es-MX')}</span>
+          </div>
+          <button
+            type="button"
+            onClick={onNext}
+            className="w-full mt-3 rounded-card bg-primary py-3 text-sm font-bold text-white hover:bg-primary/90 transition-colors"
+          >
+            Continuar
+          </button>
+        </>
       )}
     </div>
   );
@@ -535,7 +546,10 @@ export function BookingWizard({ carWashId, initialServiceId }: BookingWizardProp
   // Handlers
   function handleSelectService(id: string) {
     setSelectedServiceId(id);
-    setStep(1);
+  }
+
+  function handleNextFromService() {
+    if (selectedServiceId) setStep(1);
   }
 
   function handleSelectDate(date: string) {
@@ -638,6 +652,7 @@ export function BookingWizard({ carWashId, initialServiceId }: BookingWizardProp
           selectedExtras={selectedExtras}
           onSelectService={handleSelectService}
           onToggleExtra={handleToggleExtra}
+          onNext={handleNextFromService}
         />
       )}
 
