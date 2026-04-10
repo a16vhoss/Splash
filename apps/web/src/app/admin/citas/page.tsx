@@ -47,7 +47,10 @@ export default async function CitasPage({
       .order('fecha', { ascending: false })
       .limit(50);
 
-    if (estado) {
+    if (estado === 'completed') {
+      // "Completadas" tab includes both completed and rated (calificada)
+      query = query.in('estado', ['completed', 'rated']);
+    } else if (estado) {
       query = query.eq('estado', estado);
     }
 

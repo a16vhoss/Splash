@@ -11,6 +11,7 @@ interface AppointmentCardProps {
 const STATUS_LABELS: Record<string, string> = {
   confirmed: 'Confirmada',
   completed: 'Completada',
+  rated: 'Calificada',
   cancelled: 'Cancelada',
   pending: 'Pendiente',
 };
@@ -18,6 +19,7 @@ const STATUS_LABELS: Record<string, string> = {
 const STATUS_COLORS: Record<string, string> = {
   confirmed: colors.primary,
   completed: colors.accent,
+  rated: colors.accent,
   cancelled: colors.destructive,
   pending: colors.warning,
 };
