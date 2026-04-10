@@ -4,6 +4,7 @@ const statusStyles: Record<string, string> = {
   confirmed: 'bg-primary/10 text-primary',
   in_progress: 'bg-warning/10 text-warning',
   completed: 'bg-accent/10 text-accent',
+  rated: 'bg-accent/10 text-accent',
   cancelled: 'bg-destructive/10 text-destructive',
   no_show: 'bg-muted text-muted-foreground',
 };
@@ -12,6 +13,7 @@ const statusLabels: Record<string, string> = {
   confirmed: 'Confirmada',
   in_progress: 'En progreso',
   completed: 'Completada',
+  rated: 'Calificada',
   cancelled: 'Cancelada',
   no_show: 'Vencida',
 };

@@ -20,7 +20,7 @@ export default async function ReportesPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-extrabold text-foreground">Reportes y Analiticas</h1>
-      <AnalyticsDashboard carWashId={carWash.id} />
+      <AnalyticsDashboard carWashId={carWash.id} carWashName={carWash.nombre} />
     </div>
   );
 }

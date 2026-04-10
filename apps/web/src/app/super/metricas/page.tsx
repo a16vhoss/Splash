@@ -35,7 +35,7 @@ export default async function MetricasPage() {
   const { data: gmvRows } = await supabase
     .from('appointments')
     .select('precio_cobrado')
-    .eq('estado', 'completed') as { data: { precio_cobrado: number | null }[] | null };
+    .in('estado', ['completed', 'rated']) as { data: { precio_cobrado: number | null }[] | null };
 
   const gmvTotal = (gmvRows ?? []).reduce((sum, r) => sum + (r.precio_cobrado ?? 0), 0);
 

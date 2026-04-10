@@ -6,6 +6,8 @@ import { PeriodToggle, type GroupBy } from '@/components/period-toggle';
 import { RevenueLineChart } from '@/components/revenue-line-chart';
 import { StackedServicesChart } from '@/components/stacked-services-chart';
 import { ServiceBreakdownTable } from '@/components/service-breakdown-table';
+import { ExportButtons } from '@/components/export-buttons';
+import type { Analytics as AnalyticsType } from '@/lib/exports/types';
 
 interface SeriesPoint {
   period: string;
@@ -55,7 +57,7 @@ function daysAgoStr(n: number): string {
   return d.toISOString().split('T')[0];
 }
 
-export function AnalyticsDashboard({ carWashId }: { carWashId: string }) {
+export function AnalyticsDashboard({ carWashId, carWashName }: { carWashId: string; carWashName: string }) {
   const [data, setData] = useState<Analytics | null>(null);
   const [days, setDays] = useState<number | 'custom'>(30);
   const [fromDate, setFromDate] = useState<string>(daysAgoStr(30));
@@ -168,6 +170,21 @@ export function AnalyticsDashboard({ carWashId }: { carWashId: string }) {
             />
           </div>
         )}
+        {/* Export buttons — pushed to the right via ml-auto */}
+        {data && (
+          <div className="ml-auto">
+            <ExportButtons
+              data={data as unknown as AnalyticsType}
+              meta={{
+                carWashName,
+                fromDate,
+                toDate,
+                groupBy,
+                generatedAt: new Date(),
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* KPI Cards */}
@@ -197,13 +214,13 @@ export function AnalyticsDashboard({ carWashId }: { carWashId: string }) {
       </div>
 
       {/* Revenue over time */}
-      <div className="bg-white rounded-modal border border-border p-5 mb-6">
+      <div id="revenue-line-chart-export" className="bg-white rounded-modal border border-border p-5 mb-6">
         <h3 className="text-sm font-bold text-foreground mb-4">Ingresos en el tiempo</h3>
         <RevenueLineChart series={data.series} />
       </div>
 
       {/* Stacked services */}
-      <div className="bg-white rounded-modal border border-border p-5 mb-6">
+      <div id="stacked-services-chart-export" className="bg-white rounded-modal border border-border p-5 mb-6">
         <h3 className="text-sm font-bold text-foreground mb-4">Unidades lavadas por servicio</h3>
         <StackedServicesChart series={data.series} />
       </div>
