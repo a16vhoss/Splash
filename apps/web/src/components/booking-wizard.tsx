@@ -19,6 +19,7 @@ interface Slot {
   capacidad: number;
   ocupados: number;
   disponibles: number;
+  clienteOcupado?: boolean;
 }
 
 interface AvailabilityResponse {
@@ -304,30 +305,34 @@ function StepTime({
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {slots.map((slot) => {
           const isFull = slot.disponibles === 0;
-          const isLow = slot.disponibles >= 1 && slot.disponibles <= 2;
+          const isClientBusy = slot.clienteOcupado === true;
+          const isBlocked = isFull || isClientBusy;
+          const isLow = !isBlocked && slot.disponibles >= 1 && slot.disponibles <= 2;
 
           return (
             <button
               key={slot.time}
-              disabled={isFull}
-              onClick={() => !isFull && onSelectTime(slot.time)}
+              disabled={isBlocked}
+              onClick={() => !isBlocked && onSelectTime(slot.time)}
               className={`rounded-card border p-4 text-left transition-colors ${
-                isFull
+                isBlocked
                   ? 'border-border bg-muted cursor-not-allowed'
                   : 'border-border bg-white hover:border-primary cursor-pointer'
               }`}
             >
-              <p className="text-base font-bold text-foreground">{slot.time}</p>
+              <p className={`text-base font-bold ${isBlocked ? 'text-muted-foreground' : 'text-foreground'}`}>{slot.time}</p>
               <p
                 className={`text-xs font-semibold mt-1 ${
-                  isFull
+                  isBlocked
                     ? 'text-muted-foreground'
                     : isLow
                     ? 'text-yellow-600'
-                    : 'text-accent' // isGood
+                    : 'text-accent'
                 }`}
               >
-                {isFull
+                {isClientBusy
+                  ? 'Ya tienes cita'
+                  : isFull
                   ? 'Lleno'
                   : isLow
                   ? `${slot.disponibles} lugar${slot.disponibles > 1 ? 'es' : ''}`

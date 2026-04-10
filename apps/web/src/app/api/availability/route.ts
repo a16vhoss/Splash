@@ -94,6 +94,29 @@ export async function GET(request: NextRequest) {
   const openMinutes = timeToMinutes(businessHours.hora_apertura);
   const closeMinutes = timeToMinutes(businessHours.hora_cierre);
 
+  // 5b. Check if authenticated user has appointments on this date (any car wash)
+  const { data: { user } } = await supabase.auth.getUser();
+  const clientOcupadoSet = new Set<string>();
+  if (user) {
+    const { data: clientAppts } = await supabase
+      .from('appointments')
+      .select('hora_inicio, hora_fin')
+      .eq('client_id', user.id)
+      .eq('fecha', fecha)
+      .not('estado', 'in', '("cancelled","no_show")');
+
+    for (const appt of clientAppts ?? []) {
+      const apptStart = timeToMinutes(String(appt.hora_inicio).slice(0, 5));
+      const apptEnd = timeToMinutes(String(appt.hora_fin).slice(0, 5));
+      // Mark all slots whose [start, start+duration) overlaps [apptStart, apptEnd)
+      for (let s = openMinutes; s + slot_duration_min <= closeMinutes; s += slot_duration_min) {
+        if (s < apptEnd && s + slot_duration_min > apptStart) {
+          clientOcupadoSet.add(minutesToTime(s));
+        }
+      }
+    }
+  }
+
   // Filter out past slots when fecha is today.
   // Use Intl to get the correct Mexico date/time regardless of server timezone.
   const nowUtc = new Date();
@@ -113,7 +136,7 @@ export async function GET(request: NextRequest) {
     const ocupados = ocupadosMap.get(time) ?? 0;
     const disponibles = Math.max(0, capacidad - ocupados);
 
-    slots.push({ time, capacidad, ocupados, disponibles });
+    slots.push({ time, capacidad, ocupados, disponibles, clienteOcupado: clientOcupadoSet.has(time) });
   }
 
   return NextResponse.json({ slots, closed: false, slot_duration_min });

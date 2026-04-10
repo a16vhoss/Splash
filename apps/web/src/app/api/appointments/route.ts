@@ -138,6 +138,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Horario ya no disponible' }, { status: 409 });
   }
 
+  // 7b. Check client doesn't already have an overlapping appointment at any car wash
+  const { count: clientConflicts, error: clientConflictError } = await supabase
+    .from('appointments')
+    .select('id', { count: 'exact', head: true })
+    .eq('client_id', user.id)
+    .eq('fecha', fecha)
+    .lt('hora_inicio', hora_fin)
+    .gt('hora_fin', hora_inicio)
+    .not('estado', 'in', '("cancelled","no_show")');
+
+  if (clientConflictError) {
+    return NextResponse.json({ error: 'Error al verificar disponibilidad' }, { status: 500 });
+  }
+
+  if ((clientConflicts ?? 0) > 0) {
+    return NextResponse.json(
+      { error: 'Ya tienes una cita agendada en ese horario' },
+      { status: 409 }
+    );
+  }
+
   // 8. Insert appointment (no estacion field)
   const insertData: Record<string, any> = {
     car_wash_id,
